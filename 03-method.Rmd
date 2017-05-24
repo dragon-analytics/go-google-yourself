@@ -148,6 +148,6 @@ Figure 9. Clusters found on the map
 
 # Places Recommendation Algorithm
 
-+ The first step for this algorthm is to extract the keywords from searches and email records and obtain the frecuent locations.
-+ These keywords are classified in 90 possible categories 
++ The first step for this algorthm is to extract the keywords from searches and email records and obtain the most frequent locations.
++ These keywords are classified in 90 possible categories.
 + For each location we will use the google place api for location search 
