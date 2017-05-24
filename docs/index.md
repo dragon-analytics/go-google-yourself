@@ -1,7 +1,7 @@
 --- 
 title: "Just a Recommender System Based on Google Applications Data "
 author: "Alfredo Méndez, Eduardo D. Martínez, Alaín Cabrera, Pedro Hernández - ITAM"
-date: "2017-05-23"
+date: "2017-05-24"
 site: bookdown::bookdown_site
 documentclass: book
 biblio-style: apalike

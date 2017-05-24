@@ -18,6 +18,7 @@ In other words, how well a recommender system performs this task is reflected by
 _Go Google Yourself!_ Is a web application created to be used for any kind of user who has a Google account, this application is built with a `R-Shiny` interface and a backend mounted in `Python`, everything works in a `AWS` cluster communicated and packaged in a `Docker Swarm` working with `AWS S3` buckets.  
 
 ![user-interface](./images/user-interface.png)
+Figure 10. User Interface Beta Version
 
 Basically the Data Product it is based on 3 sources of information: Mails, Locations and Searches. The user interface has a `Browse` button where the user can upload a Takeoutfile, once the data is put on S3 buckets a Data Pipeline starts, first with a Pre-processing step, then an unsupervised density-based Machine Learning algorithm, is used to find clusters on a map, these clusters will be the most crowded places of the person, presumably: home, school, work, etc. all those places are going to be filtered by the important topics found it on Searches and Mails using Latent Dirichlet Algorithm. It is important to say that handling these important locations is the basis for showing (recommending) in the application the places of interest to, around those points with the help of the Google Maps API, the application has the option of being able to decide the time window in which it is desired to visualize.  
 
@@ -67,7 +68,8 @@ The AWS tools mentioned above were combined with Luigi and Docker, with the aim 
 
 The first objective was achieved using Luigi, which is a Python module that helped us building complex pipelines of batch jobs. It handles dependency resolution, workflow management, visualization through a web interface, among other features. It also comes with Hadoop support built in. A pipeline is a set of data processing elements or tasks, in Luigi this tasks form a Directed Aciclic Graph (DAG), where the output of each task is the input of the next one, our DAG is displayed below. [14]
 
-![Overview of the pipeline executed on Luigi\label{dagpipeline}](./images/dag_pipeline.png)
+![dagpipeline](./images/dag_pipeline.png)
+Figure 11. Overview of the pipeline executed on Luigi
 
 A Luigi task has the following structure: 
 
@@ -102,6 +104,7 @@ Each one of this nodes was an Amazon EC2 instance and on top of this nodes we se
 The complete overview of the arquitecture can be observed on the image below, starting on the left side, the Amazon EC2 instances act as a base of our infraestructure on top of this instances different nodes support a Docker swarm, which is running a Luigi server service in charge of running Docker containers. This containers execute each one of the pipeline tasks related to the processing of mail, searches or locations.   
 
 ![back-end](./images/back-end.png)
+Figure 12. Back-end Pieces Merged
 
 Amazon S3 do the storage part of every tasks, and also using indicators (objects with 0/1 values) report to the front-end the status about of each one of the pipeline tasks.  
 
