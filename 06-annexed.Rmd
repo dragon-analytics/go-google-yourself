@@ -214,8 +214,12 @@ plt.show()
 
 
 ## Locations
-```python
 
+Using the data of the volunteers for this study, we found out that there are approximately 816 registered locations per day, approximately 34 records per hour or one record every 34 seconds.  
+
+Define frequent places: 30 day window
+
+```python
 import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
@@ -236,7 +240,7 @@ ld = pd.DataFrame(raw['locations'])
 coords=ld[['latitudeE7','longitudeE7','timestampMs']]
 coords['timestampMs'] = coords['timestampMs'].apply(pd.to_numeric)
 
-inicio_s= "01/08/2016"
+inicio_s= "01/03/2017"
 final_s="30/03/2017"
 inicio=1000*time.mktime(datetime.datetime.strptime(inicio_s, "%d/%m/%Y").timetuple())
 final=1000*time.mktime(datetime.datetime.strptime(final_s, "%d/%m/%Y").timetuple())
@@ -282,7 +286,7 @@ df2=X[labels == -1]
 X=df2
 min_samples=len(df2)*.01
 
-#Second DBSCAN: HOME/SCHOOL/OFFICE detection
+#Second DBSCAN: most visited places detection
 
 db = DBSCAN(eps=epsilon, min_samples=min_samples,algorithm='ball_tree', metric='haversine').fit(X)
 labels = db.labels_
@@ -308,10 +312,6 @@ if (n_clusters_>0):
 else: print('acabamos')
 ```
 
-
-The unlabeled points correspond to transfer location records. Also, was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period.  
-
-Using the data of the volunteers for this study, we found out that there are approximately 816 registered locations per day, approximately 34 records per hour or one record every 34 seconds.  
 
 ```python
 import numpy as np
@@ -349,8 +349,8 @@ for i in range(len(ld)):
 file.close()
 coords=pd.read_csv('dia.csv', names = ["lat", "lon","timestamp","fecha","hora","dia"])
 ```
+It was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period. In order to define home, school or office adress, we count the frecuency of each cluster at different time periods.
 
-Define frequent places: 30 day window
 
 ```python
 coords3=coords[coords.fecha==coords['fecha'].unique()[0]]
