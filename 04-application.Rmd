@@ -46,6 +46,12 @@ For the development of this work we use the Google Places API Web Service.
 
 The Google Places API Web Service allows you to query for place information on a variety of categories, such as: establishments, prominent points of interest, geographic locations, and more. You can search for places either by proximity or a text string. A Place Search returns a list of places along with summary information about each place; additional information is available via a Place Details query.
 
+It is posible to restrict the results to places matching the specified type (around 90 types, for example: restaurant and library).
+
+The following example is a search request for places of type 'restaurant' within a 500m radius of a point in Sydney, Australia, containing the word 'cruise':
+
+https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=500&type=restaurant&keyword=cruise&key=YOUR_API_KEY
+
 ## The Cloud and Back-end 
 
 ### Amazon Web Services
