@@ -392,7 +392,7 @@ for i in range(n_clusters_):
     if(len(util)>0):
         lon= np.mean(util['lon'])
         lat= np.mean(util['lat'])  
-        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY"
+        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=YOUR_API_KEY"
         with urlopen(url_maps) as response:
             result= simplejson.load(urlopen(url_maps))
         direcciones[i]=result['results'][0]['formatted_address']
@@ -422,8 +422,6 @@ print('Lugares: 'direcciones)
 
 
 ```python
-#print('Trabajo: ',direcciones[max(matutino, key=matutino.get)])
-
 aux=[k for k, v in casa.items() if v > 0.4*sum(casa.values())]
 for i in aux:
     print('Casa ',i,': ',direcciones[i])
@@ -433,10 +431,11 @@ for i in aux:
 ```
 
 Casa  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
+
 Trabajo/Escuela  0 :  Edificio 10, Altavista, Ciudad de México, CDMX, Mexico
+
 Trabajo/Escuela  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
 
-direcciones
 
 Day
 
