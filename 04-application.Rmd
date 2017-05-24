@@ -28,7 +28,7 @@ In order to make a short summary, what the application does is: load the files, 
 
 ## The User Interface
 
-### R-Shiny, Keep it Simple (Alfy)
+### R-Shiny, Keep it Simple
 
 For the development of the application it was used [Shiny](https://shiny.rstudio.com) as front-end, and the only prupose is visualize the output of the models and the descriptive data, to understand this, Shiny will only cares about how to get summary dataframes.
 
@@ -38,7 +38,7 @@ For the sake of simplicity it is been chosed [Flask](http://flask.pocoo.org) as 
 
 Flask is called a micro framework because it does not require particular tools or libraries. It has no database abstraction layer for itself, form validation, or any other components. However, Flask supports extensions that can add application features as if they were implemented here is used to run the cluster and the database.[10]
 
-### Google Maps API (Alaín)
+### Google Maps API
 
 + What is Google Maps API
 + How google maps api works?
@@ -52,7 +52,7 @@ Flask is called a micro framework because it does not require particular tools o
 
 ### Amazon Web Services
 
-Our back-end implementation made use of two powerfull Amazon Web Services (AWS) tools, Amazon Simple Storage Service (S3) and Amazon Elastic Compute Cloud (EC2). The first, Amazon S3 known as storage for Internet, provides different interfaces REST, SOAP and BitTorrent that allow to store and obtain any amount of data, from anywhere on the web. Although S3 does not provide details on its design, clearly manages its data through an object storage arquitecture. This objects are organized into buckets. A bucket is a container used to store key/value pairs in S3 and can hold an unlimited amount of data so the user could potentially had just one bucket for all of his information. 
+Our back-end implementation made use of two powerfull Amazon Web Services (AWS) tools, Amazon Simple Storage Service (S3) and Amazon Elastic Compute Cloud (EC2). The first, Amazon S3 known as storage for Internet, provides different interfaces REST, SOAP and BitTorrent that allow to store and obtain any amount of data, from anywhere on the web. Although S3 does not provide details on its design, clearly manages its data through an object storage arquitecture. This objects are organized into buckets. A bucket is a container used to store key/value pairs in S3 and can hold an unlimited amount of data so the user could potentially had just one bucket for all of his information.  
 According to Amazon, this design aims at to provide scalability, high avalilability and low latency at commodity costs. [11] Amazon S3, also has implementations on different programming languages and third party connectors like Java, .NET, Python, PHP, Ruby, among others, that help on data migration to the cloud. Requests of resources are authorized using an Access Control List (ACL) associated with each bucket and object. The names and keys of the bucket must be unique and chosen so that the objects are addressable by HTTP URLs: [12]
 
 * http://s3.amazonaws.com/bucket/key
@@ -89,23 +89,25 @@ if __name__ == '__main__':
 	luigi.run()
 ```
 
-This tasks can execute obviously Python code, but also bash commands and with this the ability to run any programming language indirectly or even create a docker container inside a task, which gather all the requirements needed to run that task. Tasks are often executed in parallel or in time-sliced fashion. In our tasks we share data between them using Amazon S3, where we also update indicators that the front-end reads to update the pipeline overall state to display it to the user.
+This tasks can execute obviously Python code, but also bash commands and with this the ability to run any programming language indirectly or even create a docker container inside a task, which gather all the requirements needed to run that task. Tasks are often executed in parallel or in time-sliced fashion. In our tasks we share data between them using Amazon S3, where we also update indicators that the front-end reads to update the pipeline overall state to display it to the user.  
 
-A template to create a Luigi pipeline using Docker is available at https://github.com/nanounanue/pipeline-template. 
+A template to create a Luigi pipeline using Docker is based on [Adolfo de Unanue](https://github.com/nanounanue/pipeline-template. ) work.  
 
-Docker was a key piece of our arquitecture because of its incredible replication solution and its philosopy related to the old Java promise of write once, run anywhere. In a technical definition, Docker is an open source engine that quickly wraps up any application and all its peculiar dependencies in a lightweight, portable, self-sufficient container that can run virtually anywhere on anybody's infrastructure. [15] Docker uses the resource isolation features of the Linux kernel such as cgroups and kernel namespaces, and a union-capable file system such as OverlayFS and others [16] to allow independent "containers" to run within a single Linux instance, avoiding the overhead of starting and maintaining virtual machines. [17]
+Docker was a key piece of our arquitecture because of its incredible replication solution and its philosopy related to the old Java promise of write once, run anywhere. In a technical definition, Docker is an open source engine that quickly wraps up any application and all its peculiar dependencies in a lightweight, portable, self-sufficient container that can run virtually anywhere on anybody's infrastructure. [15] Docker uses the resource isolation features of the Linux kernel such as cgroups and kernel namespaces, and a union-capable file system such as OverlayFS and others [16] to allow independent "containers" to run within a single Linux instance, avoiding the overhead of starting and maintaining virtual machines.[17]  
 
-Taking this in consideration the last two objectives of our arquitectures were achieved using the tools Docker Engine and Docker Swarm. The latter, like its name states helped us build a swarm, this is a cluster of Docker engines, or nodes (related to a isolated virtual machine), where one can deploy services. The Docker Engine CLI and API include commands to manage swarm nodes (e.g., add or remove nodes), and deploy and orchestrate services across the swarm. [18] 
+Taking this in consideration the last two objectives of our arquitectures were achieved using the tools Docker Engine and Docker Swarm. The latter, like its name states helped us build a swarm, this is a cluster of Docker engines, or nodes (related to a isolated virtual machine), where one can deploy services. The Docker Engine CLI and API include commands to manage swarm nodes (e.g., add or remove nodes), and deploy and orchestrate services across the swarm. [18]   
 
-Each one of this nodes was an Amazon EC2 instance and on top of this nodes we setup a Docker swarm and deploy a Luigi server as a service, the latter was able to run as many Luigi workers as required. The swarm manager used its internal load balancing to distribute the Luigi tasks among services within the cluster, achieving with this high replication and scalability.
+Each one of this nodes was an Amazon EC2 instance and on top of this nodes we setup a Docker swarm and deploy a Luigi server as a service, the latter was able to run as many Luigi workers as required. The swarm manager used its internal load balancing to distribute the Luigi tasks among services within the cluster, achieving with this high replication and scalability.  
 
-The complete overview of the arquitecture can be observed on the image below, starting on the left side, the Amazon EC2 instances act as a base of our infraestructure on top of this instances different nodes support a Docker swarm, which is running a Luigi server service in charge of running Docker containers. This containers execute each one of the pipeline tasks related to the processing of mail, searches or locations. 
+The complete overview of the arquitecture can be observed on the image below, starting on the left side, the Amazon EC2 instances act as a base of our infraestructure on top of this instances different nodes support a Docker swarm, which is running a Luigi server service in charge of running Docker containers. This containers execute each one of the pipeline tasks related to the processing of mail, searches or locations.   
 
 ![back-end](./images/back-end.png)
 
-Amazon S3 do the storage part of every tasks, and also using indicators (objects with 0/1 values) report to the front-end the status about of each one of the pipeline tasks.
+Amazon S3 do the storage part of every tasks, and also using indicators (objects with 0/1 values) report to the front-end the status about of each one of the pipeline tasks.  
 
 ## Further Than Beta Version
+
+As part of the project itself is significat to notice which are the main areas to keep working, some ideas are: 
 
 + Integrate more google data applications
 

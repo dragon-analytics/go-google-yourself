@@ -18,57 +18,7 @@ The amount of data varies for each account and for the cases explored, the data 
 
 Furthermore, we have to settle some questions about how can we get the data.  
 
-## Search
-
-What insights can we get? 
-
-+ How are searches by hour, day, month?
-+ Are there long search times?
-+ Productive searches?
-+ Do the most wanted words say anything?
-
-How the data looks like?
-
-        {"query":		
-        	{"id":			
-        		[{"timestamp_usec":"1407774749032392"}],		
-        	"query_text":"banco mundial"}}	
-        {"query":		
-        	{"id":			
-        		[{"timestamp_usec":"1407774749075527"}],		
-        	“query_text":"data lake"}}	
-        {"query":		
-        	{"id":			
-        		[{"timestamp_usec":"1407774749095273"}],		
-        	“query_text”:"shiba dog"}}
-
-
-## Locations
-
-What insights can we get? 
-
-+ What is the frequency of movements?
-+ Can work and home be identified?
-+ When is a move identified?
-+ What are the average transfers in time and distance?
-
-How the data looks like?
-
-        {"timestampMs": "1414819151315",    
-        	"latitudeE7" : 204435729,    
-        	"longitudeE7" : -872882348,    
-        	"accuracy" : 49,    
-        	"activitys" : [ { "timestampMs": "1414819136573",
-        	      "activities" : [ { "type" : "inVehicle", "confidence" : 62 }, 
-        						{ "type" : "still", "confidence" : 29		},
-        					 	{ "type" : "onBicycle", "confidence" : 5 },
-        						{ "type" : "unknown",  "confidence" : 5 } 
-        					      ]    
-        				  } ] 
-         }
-
-
-## Emails
+## Email Data
 
 What insights can we get? 
 
@@ -91,11 +41,63 @@ How the data looks like?
         Content-Transfer-Encoding: quoted-printable
         —CONTENT—
 
+
+## Search Data
+
+What insights can we get? 
+
++ How are searches by hour, day, month?
++ Are there long search times?
++ Productive searches?
++ Do the most wanted words say anything?
+
+How the data looks like?
+
+        {"query":       
+            {"id":          
+                [{"timestamp_usec":"1407774749032392"}],        
+            "query_text":"banco mundial"}}  
+        {"query":       
+            {"id":          
+                [{"timestamp_usec":"1407774749075527"}],        
+            “query_text":"data lake"}}  
+        {"query":       
+            {"id":          
+                [{"timestamp_usec":"1407774749095273"}],        
+            “query_text”:"shiba dog"}}
+
+
+## Location Data
+
+What insights can we get? 
+
++ What is the frequency of movements?
++ Can work and home be identified?
++ When is a move identified?
++ What are the average transfers in time and distance?
+
+How the data looks like?
+
+        {"timestampMs": "1414819151315",    
+            "latitudeE7" : 204435729,    
+            "longitudeE7" : -872882348,    
+            "accuracy" : 49,    
+            "activitys" : [ { "timestampMs": "1414819136573",
+                  "activities" : [ { "type" : "inVehicle", "confidence" : 62 }, 
+                                { "type" : "still", "confidence" : 29       },
+                                { "type" : "onBicycle", "confidence" : 5 },
+                                { "type" : "unknown",  "confidence" : 5 } 
+                                  ]    
+                          } ] 
+         }
+
+
 ### Data Pipeline
 
 In order to conduct the study and the application development we have to try to answer those questions and have a scope to get information with data merged to make the recommender system accurate.  
 
 We also might make a list of reachable tasks:  
+
 + Estimate a level of area as neighborhood or city where the user has lived or worked, let's call them, Favorite Places.
 + Identify, through locations combined with searches, tastes or additional activities of the user.
 + Find a network related with searches
