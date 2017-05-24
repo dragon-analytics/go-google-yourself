@@ -437,7 +437,7 @@ Trabajo/Escuela  0 :  Edificio 10, Altavista, Ciudad de México, CDMX, Mexico
 Trabajo/Escuela  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
 
 
-Day
+Additionally it is possible to obtain the activity performed by the people for each day.
 
 ```python
 #with open('Historialdeubicaciones.json', 'r') as fh:
@@ -504,7 +504,7 @@ plt.show()
 clusters = [X[labels == i] for i in range(n_clusters_)]
 
 markers=""" """
-places="AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU"
+places="YOUR_API_KEY"
 c0=scaler.inverse_transform(clusters[0])
 c0r=pd.DataFrame(data=c0[0:,0:])
 c0r.columns = ['lat', 'lon']
@@ -530,7 +530,7 @@ for i in range(n_clusters_):
     if(len(util)>0):
         lon= np.mean(util['lon'])
         lat= np.mean(util['lat'])  
-        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY"
+        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=YOUR_API_KEY"
         with urlopen(url_maps) as response:
             result= simplejson.load(urlopen(url_maps))
         print (result['results'][0]['formatted_address'])
