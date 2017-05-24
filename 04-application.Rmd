@@ -41,8 +41,11 @@ Flask is called a micro framework because it does not require particular tools o
 
 ### Google Maps API
 
-+ What is Google Maps API
-+ How google maps api works?
+Google APIs is a set of application programming interfaces (APIs) developed by Google which allow communication with Google Services and their integration to other services. Examples of these include Search, Gmail, Translate or Google Maps. Third-party apps can use these APIs to take advantage of or extend the functionality of the existing services.
+For the development of this work we use the Google Places API Web Service.
+
+The Google Places API Web Service allows you to query for place information on a variety of categories, such as: establishments, prominent points of interest, geographic locations, and more. You can search for places either by proximity or a text string. A Place Search returns a list of places along with summary information about each place; additional information is available via a Place Details query.
+
 + How Clustering Models works?
 + How the recommendations looks like?
 
