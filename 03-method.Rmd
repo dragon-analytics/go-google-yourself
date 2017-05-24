@@ -145,3 +145,5 @@ As it can be seen on the next outputs, first it shows the most frequent places, 
 
 ![clusters](./images/clusters.png)
 Figure 9. Clusters found on the map
+
+# Places Recommendation
