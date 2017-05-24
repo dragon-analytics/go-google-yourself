@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Just a Recommender System Based on Google Applications Data</title>
+  <meta name="description" content="A short description of the study driven">
+  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Just a Recommender System Based on Google Applications Data" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="A short description of the study driven" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Just a Recommender System Based on Google Applications Data" />
+  
+  <meta name="twitter:description" content="A short description of the study driven" />
+  
+
+<meta name="author" content="Alfredo Méndez, Eduardo D. Martínez, Alaín Cabrera, Pedro Hernández - ITAM">
+
+
+<meta name="date" content="2017-05-23">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="introduction.html">
+<link rel="next" href="exploratory-data-analysis.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Go & Google Yourself</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Abstract</a></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a><ul>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#go-google-yourself"><i class="fa fa-check"></i><b>2.1</b> Go Google Yourself!</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#google-takeout"><i class="fa fa-check"></i><b>2.2</b> Google Takeout</a></li>
+<li class="chapter" data-level="2.3" data-path="introduction.html"><a href="introduction.html#recommender-systems"><i class="fa fa-check"></i><b>2.3</b> Recommender Systems</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html"><i class="fa fa-check"></i><b>3</b> The Shape of The Data</a><ul>
+<li class="chapter" data-level="3.1" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#google-data"><i class="fa fa-check"></i><b>3.1</b> Google Data</a></li>
+<li class="chapter" data-level="3.2" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#search"><i class="fa fa-check"></i><b>3.2</b> Search</a></li>
+<li class="chapter" data-level="3.3" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#locations"><i class="fa fa-check"></i><b>3.3</b> Locations</a></li>
+<li class="chapter" data-level="3.4" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#emails"><i class="fa fa-check"></i><b>3.4</b> Emails</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#data-pipeline"><i class="fa fa-check"></i><b>3.4.1</b> Data Pipeline</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html"><i class="fa fa-check"></i><b>4</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="4.1" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#network-analysis"><i class="fa fa-check"></i><b>4.1</b> Network Analysis</a></li>
+<li class="chapter" data-level="4.2" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#e-mails-analysis"><i class="fa fa-check"></i><b>4.2</b> E-mails Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#plot-the-mail-traffic-by-the-day-of-the-week"><i class="fa fa-check"></i><b>4.2.1</b> Plot the mail traffic by the day of the week</a></li>
+<li class="chapter" data-level="4.2.2" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#plot-the-mail-traffic-by-the-hour-of-the-day"><i class="fa fa-check"></i><b>4.2.2</b> Plot the mail traffic by the hour of the day</a></li>
+<li class="chapter" data-level="4.2.3" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#plot-the-mail-traffic-by-the-minute-of-the-day"><i class="fa fa-check"></i><b>4.2.3</b> Plot the mail traffic by the minute of the day</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#locations-1"><i class="fa fa-check"></i><b>4.3</b> Locations</a></li>
+<li class="chapter" data-level="4.4" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#searches"><i class="fa fa-check"></i><b>4.4</b> Searches</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html"><i class="fa fa-check"></i><b>5</b> Building a Recommender System</a><ul>
+<li class="chapter" data-level="5.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#modular-application-framework"><i class="fa fa-check"></i><b>5.1</b> Modular Application Framework</a></li>
+<li class="chapter" data-level="5.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-user-interface"><i class="fa fa-check"></i><b>5.2</b> The User Interface</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#r-shiny-keep-it-simple-alfy"><i class="fa fa-check"></i><b>5.2.1</b> R-Shiny, Keep it Simple (Alfy)</a></li>
+<li class="chapter" data-level="5.2.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#google-maps-api-alain"><i class="fa fa-check"></i><b>5.2.2</b> Google Maps API (Alaín)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-cloud-and-back-end"><i class="fa fa-check"></i><b>5.3</b> The Cloud and Back-end</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#amazon-web-services"><i class="fa fa-check"></i><b>5.3.1</b> Amazon Web Services</a></li>
+<li class="chapter" data-level="5.3.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#merge-the-pieces"><i class="fa fa-check"></i><b>5.3.2</b> Merge the Pieces</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#further-than-beta-version"><i class="fa fa-check"></i><b>5.4</b> Further Than Beta Version</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>6</b> Conclusion</a></li>
+<li class="chapter" data-level="7" data-path="bibliografy.html"><a href="bibliografy.html"><i class="fa fa-check"></i><b>7</b> Bibliografy</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Just a Recommender System Based on Google Applications Data</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="the-shape-of-the-data" class="section level1">
+<h1><span class="header-section-number">Chapter 3</span> The Shape of The Data</h1>
+<div id="google-data" class="section level2">
+<h2><span class="header-section-number">3.1</span> Google Data</h2>
+<p>On every field of Data Science, the researcher has to be clear about the data sources is using, it is important to identify the variety and the types of format is built of. First, let’s take a look at the data and its nature, so after downloading <code>Google Takeout</code> Data one has to be able to handle the data format.</p>
+<p>As is said before, this study used three Google sources, <code>Mail</code>, <code>Searches</code> and <code>Locations</code>, because is considered the most used for an average person nowadays, on forwarding studies and developments, is planned to add more Google applications, e.g. Google Chrome history, Contacts, YouTube, and Drive are the most interesting.</p>
+<p>The file format used for Search and Location history is <a href="http://www.json.org/json-es.html">json</a> there some approaches to use this kind of data, and is getting more popular and well documented, on <a href="https://stedolan.github.io/jq/manual/">jq Manual</a> is very clear to see.</p>
+<p>On the other hand, the transformation of data from <a href="https://en.wikipedia.org/wiki/Mbox">mbox</a> to readable is quite more difficult because does not have a regular shape, we defined where each email is identified and separated from each one part of the same body, anyway there are some <code>Python</code> libraries that are very helpful.</p>
+<p>Part of the <code>Exploratory Data Analysis</code> is to create a <code>Graph DataBase</code> to represent the network of the mails and identify the people with whom the user have more interaction, the tool used is <a href="https://neo4j.com/">Neo4j</a>. Finally, we extracted keywords of the mails and searches to detect important topics in them.</p>
+<p>The researcher has to notice that one has to start with some questions, and actually before to beginning to answer ourselves it is been found that there are some general observations when the datasets was explored.</p>
+<p>The amount of data varies for each account and for the cases explored, the data are available since 2011 (when Google Takeout project starts). Even though all the Search data is splited on various <code>json</code> files of 100 kb each (on average). A user has Location History as long as the user gives permission on the cellphone, actually, it is been found out the location accuracy got better over the time, presumably because the GPS got better over the time as well.</p>
+<p>Furthermore, we have to settle some questions about how can we get the data.</p>
+</div>
+<div id="search" class="section level2">
+<h2><span class="header-section-number">3.2</span> Search</h2>
+<p>What insights can we get?</p>
+<ul>
+<li>How are searches by hour, day, month?</li>
+<li>Are there long search times?</li>
+<li>Productive searches?</li>
+<li>Do the most wanted words say anything?</li>
+</ul>
+<p>How the data looks like?</p>
+<pre><code>    {&quot;query&quot;:       
+        {&quot;id&quot;:          
+            [{&quot;timestamp_usec&quot;:&quot;1407774749032392&quot;}],        
+        &quot;query_text&quot;:&quot;banco mundial&quot;}}  
+    {&quot;query&quot;:       
+        {&quot;id&quot;:          
+            [{&quot;timestamp_usec&quot;:&quot;1407774749075527&quot;}],        
+        “query_text&quot;:&quot;data lake&quot;}}  
+    {&quot;query&quot;:       
+        {&quot;id&quot;:          
+            [{&quot;timestamp_usec&quot;:&quot;1407774749095273&quot;}],        
+        “query_text”:&quot;shiba dog&quot;}}</code></pre>
+</div>
+<div id="locations" class="section level2">
+<h2><span class="header-section-number">3.3</span> Locations</h2>
+<p>What insights can we get?</p>
+<ul>
+<li>What is the frequency of movements?</li>
+<li>Can work and home be identified?</li>
+<li>When is a move identified?</li>
+<li>What are the average transfers in time and distance?</li>
+</ul>
+<p>How the data looks like?</p>
+<pre><code>    {&quot;timestampMs&quot;: &quot;1414819151315&quot;,    
+        &quot;latitudeE7&quot; : 204435729,    
+        &quot;longitudeE7&quot; : -872882348,    
+        &quot;accuracy&quot; : 49,    
+        &quot;activitys&quot; : [ { &quot;timestampMs&quot;: &quot;1414819136573&quot;,
+              &quot;activities&quot; : [ { &quot;type&quot; : &quot;inVehicle&quot;, &quot;confidence&quot; : 62 }, 
+                            { &quot;type&quot; : &quot;still&quot;, &quot;confidence&quot; : 29       },
+                            { &quot;type&quot; : &quot;onBicycle&quot;, &quot;confidence&quot; : 5 },
+                            { &quot;type&quot; : &quot;unknown&quot;,  &quot;confidence&quot; : 5 } 
+                              ]    
+                      } ] 
+     }</code></pre>
+</div>
+<div id="emails" class="section level2">
+<h2><span class="header-section-number">3.4</span> Emails</h2>
+<p>What insights can we get?</p>
+<ul>
+<li>How is the traffic over time?</li>
+<li>Is it possible to make a network of people?</li>
+<li>What is the relationship of sent with received?</li>
+<li>Does the subject matter mean anything?</li>
+</ul>
+<p>How the data looks like?</p>
+<pre><code>    X-GM-THRID: 1545043292255087830
+    X-Gmail-Labels: Importante,Destacados,Recibidos
+    From: &lt;ventasweb@interjet.com.mx&gt;
+    To: &lt;xxx@gmail.com&gt;
+    Reply-To: &lt;ventasweb@interjet.com.mx&gt;
+    Date: Fri, 9 Sep 2016 19:41:43 -0500
+    Subject: Interjet Itinerario
+    Content-Type: multipart/alternative;
+    Message-ID: &lt;e34b7917-c506-4a84-ac90-626bf8fafb7a
+    Content-Transfer-Encoding: quoted-printable
+    —CONTENT—</code></pre>
+<div id="data-pipeline" class="section level3">
+<h3><span class="header-section-number">3.4.1</span> Data Pipeline</h3>
+<p>In order to conduct the study and the application development we have to try to answer those questions and have a scope to get information with data merged to make the recommender system accurate.</p>
+<p>We also might make a list of reachable tasks:<br />
++ Estimate a level of area as neighborhood or city where the user has lived or worked, let’s call them, Favorite Places. + Identify, through locations combined with searches, tastes or additional activities of the user. + Find a network related with searches + Estimate what the user is engaged in, by correlating emails and searches. + Make clusters in order to find places of interest + Generate recommendations based on the profile of what you consume daily + Frequencies for each location level for time window + Extract “zone” more frequently and define it as “residence city”.</p>
+<p>A high leve pipeline could be</p>
+<p><img src="images/pipeline.png" alt="pipeline" /> Figure 1. The Data Pipeline of Go Google Yourself!</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="exploratory-data-analysis.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

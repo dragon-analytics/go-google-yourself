@@ -1,0 +1,857 @@
+# Exploratory Data Analysis
+
+On every Data Science study the researcher has to follow a certain path, at this stage, once the laborious task of data manipulation is done, the next step to follow in the process is to become intimately familiar with the data set by performing Exploratory Data Analysis (EDA). The way to gain this level of understanding is to utilize the features of the statistical environment the researcher is using that support this effort.[5]  
+
+It is always a good idea to explore a data set with multiple exploratory techniques, especially when they can be done together for comparison. Naturally, every dataset is different, sometimes one has to deal with many features or many samples, or just the opposite. The notion that has been followed is document oriented because Google data give text, we might say that every search or every mail is a document that belongs into a `Corpus`.
+
+For this development, it ain't has a large amount of features but and important amount of effort to merge the data. Then, it is quite possible that one may need to revisit one or more data manipulation tasks in order to refine or transform the data even further. The goal of exploratory data analysis is to obtain confidence in the data to a point where one is ready to engage a machine learning algorithms.  
+
+On this section the reader is going to be able to replicate the Exploratory Data Analysis despiting the web app itself, with the only intention to make clear that before make modeling the researcher has to know the insights the data can say, on this study, the problem is not the number or complexity of features but how connected they are because is all about text and georeference.  
+
+## Network Analysis
+
+What if because of my networking one is tended to make different choices? Is it the same relevance that one send ten emails to ten persons than send ten emails to two persons?  
+
+Well, it is quite difficult to see at the first gaze, and maybe we have to make a deeper in-degrees and out-degrees analysis on e-mail networking. But the notion is going to follow is on popular a topic is around the net. On the image is clear to see where is the center of the graph, that center of gravity is the main user related with all the networking, then one can see communities, of course it depends on the user how big the communities is, the sure thing is that hwere is a community is a internet domain related on that community, actually the prediction is going to take the domains along with subjects to find the topics.   
+
+![graph](./images/graph.png)
+
+Let's find the biggest email threads, once we got it, we visualize the longest path, using cypher query language  
+
+```sql 
+MATCH p=(e:Email)<-[:REPLY*]-(r:Email)<-[]-(sender:Account)
+WHERE NOT (e)-[:REPLY]->()
+RETURN sender.name, e.subject, Id(e), length(p) - 1 AS depth
+ORDER BY depth DESC
+```
+
+
+To achieve a database based on graph we used a parser built on [Go](https://golang.org/) programming language, helped on a '.mbox' reader built in [Perl](https://www.perl.org/)
+
+A little summary of `email2neo4j`package:  
+
+`mbox2neo4j` is go command line tools that allow you to import your emails from an mbox file into a neo4j graph database. It used a model from the email example project that is explained in Chapter 3 of the book [Graph Databases](http://graphdatabases.com/) by Ian Robinson, Jim Webber and Emil Eifrem (which is a truly great introduction to the graph btw)
+
+First we have to take the attachments of the e-mails
+
+On terminal:  
+
+        perl strip-attachments.pl /path/to/mbox/file.mbox
+
+Then
+
+        mbox2neo4j /path/to/mbox/file localhost:7474
+
+## E-mails Analysis
+
+It is important to know the distribution of the emailing traffic, then is suitable to know when recommend, as we see before the more we know the user data the accurate the recommendation.  
+The e-mail traffic analysis through the time is partially based on [Geoff Boeing](http://geoffboeing.com/) work, and it is been developed on `python`
+
+```python
+import mailbox, pandas as pd, numpy as np 
+import matplotlib.pyplot as plt, matplotlib.font_manager as fm
+from dateutil.parser import parse as parse_datetime
+%matplotlib inline
+```
+
+```python
+# define the fonts to use for plots
+#family = 'Myriad Pro'
+family = 'serif'
+title_font = fm.FontProperties(family=family, style='normal', size=20, weight='normal', stretch='normal')
+label_font = fm.FontProperties(family=family, style='normal', size=16, weight='normal', stretch='normal')
+ticks_font = fm.FontProperties(family=family, style='normal', size=12, weight='normal', stretch='normal')
+```
+
+Load the Gmail archive and parse dates/times from messages
+
+```python
+# load the mbox file
+#path = 'Destacados.mbox'
+path = '/Users/pedrohserrano/google-takeout/Mail/Enviados.mbox'
+mbox = mailbox.mbox(path)
+print('There are {:,} messages in the archive.'.format(len(mbox)))
+```
+
+There are 1,699 messages in the archive.  
+
+The Gmail mbox file includes emails and hangouts chats among its "messages". Hangouts messages don't have date/time, so we'll only parse dates and times from the actual emails, and just ignore the hangouts chats. Also, some chats do have a date. To filter them out, verify that if the message has a label that the label does not include "Chat".
+
+```python
+
+# get a list of the dates/times of all the messages in the mbox
+all_dates = []
+all_times = []
+for message in mbox:
+    # it's an email and not a chat if there's no label, or if there's a label but it's not 'chat'
+    if not 'X-Gmail-Labels' in message or ('X-Gmail-Labels' in message and not 'Chat' in message['X-Gmail-Labels']):
+        if 'Date' in message and message['Date'] is not None:
+            try:
+                date, time = str(parse_datetime(message['Date'])).split(' ')
+            except Exception as e:
+                print(e, message['Date'])
+            all_dates.append(date)
+            all_times.append(time)
+        else:
+            # hangouts messages have no Date key, so skip them
+            pass
+print('There are {:,} messages with dates.'.format(len(all_dates)))
+```
+
+There are 1,699 messages with dates.
+
+Plot the mail traffic by date
+
+```python
+# get the count per date
+date_counts = pd.Series(all_dates).value_counts().sort_index()
+print('There are {:,} dates with messages.'.format(len(date_counts)))
+date_counts.head()
+
+# not every date necessarily has a message, so fill in missing dates in the range with zeros
+date_range = pd.date_range(start=min(all_dates), end=max(all_dates), freq='D')
+index = date_range.map(lambda x: str(x.date()))
+date_counts = date_counts.reindex(index, fill_value=0)
+
+print('There are {:,} dates total in the range, with or without messages.'.format(len(date_counts)))
+date_counts.head()
+
+# create a series of labels for the plot: each new year's day
+xlabels = pd.Series([label if '01-01' in label else None for label in date_counts.index])
+xlabels = xlabels[pd.notnull(xlabels)]
+xlabels.head()
+
+# plot the counts per day
+fig = plt.figure(figsize=[15, 5])
+ax = date_counts.plot(kind='line', linewidth=0.5, alpha=0.5, color='g')
+
+ax.grid(True)
+ax.set_xticks(xlabels.index)
+ax.set_xticklabels(xlabels, rotation=35, rotation_mode='anchor', ha='right', fontproperties=ticks_font)
+ax.set_ylabel('Number of emails', fontproperties=label_font)
+ax.set_title('Sent mails traffic per day', fontproperties=title_font)
+
+fig.tight_layout()
+fig.savefig('images/gmail-traffic-day-destacados.png', dpi=96)
+plt.show()
+```
+
+![gmail-traffic-day-destacados](./images/gmail-traffic-day-destacados.png)
+
+Plot the traffic month by month
+
+```python
+
+# get the count per month
+all_months = [x[:-3] for x in all_dates]
+month_counts = pd.Series(all_months).value_counts().sort_index()
+
+
+# not every month necessarily has a message, so fill in missing months in the range with zeros
+date_range = pd.date_range(start=min(all_dates), end=max(all_dates), freq='D')
+months_range = date_range.map(lambda x: str(x.date())[:-3])
+index = np.unique(months_range)
+month_counts = month_counts.reindex(index, fill_value=0)
+
+# create a series of labels for the plot: each january
+xlabels = pd.Series([label if '-01' in label else None for label in month_counts.index])
+xlabels = xlabels[pd.notnull(xlabels)]
+xlabels.head()
+
+# plot the counts per month
+fig = plt.figure(figsize=[15, 5])
+ax = month_counts.plot(kind='line', linewidth=2.5, alpha=0.6, color='g', marker='+', markeredgecolor='g')
+
+ax.grid(True)
+ax.set_xticks(xlabels.index)
+ax.set_xticklabels(xlabels, rotation=35, rotation_mode='anchor', ha='right', fontproperties=ticks_font)
+ax.set_ylabel('Number of emails', fontproperties=label_font)
+ax.set_title('Sent mail traffic per month', fontproperties=title_font)
+
+fig.tight_layout()
+fig.savefig('images/gmail-traffic-month.png', dpi=96)
+plt.show()
+```
+
+![gmail-traffic-month](./images/gmail-traffic-month.png)
+
+### Plot the mail traffic by the day of the week
+
+
+```python
+
+# get the count per day of the week
+day_counts = pd.DataFrame()
+day_counts['count'] = date_counts
+day_counts['day_of_week'] = date_counts.index.map(lambda x: parse_datetime(x).weekday())
+mean_day_counts = day_counts.groupby('day_of_week')['count'].mean()
+xlabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+```
+
+```python
+fig = plt.figure(figsize=[15, 5])
+ax = mean_day_counts.plot(kind='bar', width=0.6, alpha=0.5, color='g', edgecolor='#333333')
+
+ax.yaxis.grid(True)
+ax.set_xticklabels(xlabels, rotation=35, rotation_mode='anchor', ha='right', fontproperties=ticks_font)
+for label in ax.get_yticklabels():
+    label.set_fontproperties(ticks_font)
+
+ax.set_title('Sent mails traffic by day of the week', fontproperties=title_font)
+ax.set_xlabel('')
+ax.set_ylabel('Mean number of emails', fontproperties=label_font)
+
+fig.tight_layout()
+fig.savefig('images/gmail-traffic-day-week.png', dpi=96)
+plt.show()
+```
+
+![gmail-traffic-day-week](./images/gmail-traffic-day-week.png)
+
+### Plot the mail traffic by the hour of the day
+
+```python
+# get the count per hour of the day
+times = pd.Series(all_times).map(lambda x: '{:02}:00'.format(parse_datetime(x).hour))
+time_counts = times.value_counts().sort_index()
+time_counts.head()
+
+fig = plt.figure(figsize=[15, 5])
+ax = time_counts.plot(kind='bar', width=0.8, alpha=0.5, color='g', edgecolor='#333333')
+
+ax.yaxis.grid(True)
+ax.set_xticklabels(time_counts.index, rotation=45, rotation_mode='anchor', ha='right', fontproperties=ticks_font)
+for label in ax.get_yticklabels():
+    label.set_fontproperties(ticks_font)
+
+ax.set_title('Sent mails traffic by hour of the day', fontproperties=title_font)
+ax.set_ylabel('Number of emails', fontproperties=label_font)
+
+fig.tight_layout()
+fig.savefig('images/gmail-traffic-hour.png', dpi=96)
+plt.show()
+```
+
+![gmail-traffic-hour](./images/gmail-traffic-hour.png)
+
+### Plot the mail traffic by the minute of the day
+
+```python
+# get the count per minute of the day, as hh:mm
+minutes = pd.Series(all_times).map(lambda x: '{:02}:{:02}'.format(parse_datetime(x).hour, parse_datetime(x).minute))
+minute_counts = minutes.value_counts().sort_index()
+
+# not every minute necessarily has a message, so fill in missing times with zeros
+time_range = pd.date_range(start='0:00', end='23:59', freq='1min')
+index = time_range.map(lambda x: '{:02}:{:02}'.format(x.hour, x.minute))
+minute_counts = minute_counts.reindex(index, fill_value=0)
+
+# create a series of labels for the plot: each new hour
+xlabels = pd.Series([label if ':00' in label else None for label in minute_counts.index])
+xlabels = xlabels[pd.notnull(xlabels)]
+
+# plot the counts per minute
+fig = plt.figure(figsize=[15, 5])
+ax = minute_counts.plot(kind='line', linewidth=0.7, alpha=0.7, color='g')
+
+ax.grid(True)
+ax.set_xticks(xlabels.index)
+ax.set_xticklabels(xlabels, rotation=45, rotation_mode='anchor', ha='right', fontproperties=ticks_font)
+ax.set_ylabel('Number of emails', fontproperties=label_font)
+ax.set_title('Sent mails traffic by minute of the day', fontproperties=title_font)
+
+fig.tight_layout()
+fig.savefig('images/gmail-traffic-minute.png', dpi=96)
+plt.show()
+```
+
+![gmail-traffic-hour](./images/gmail-traffic-minute.png)
+
+As we can see here if we want to develop a recomender system around this user better we send ads based on how likely the user is online, we can know that when he/she is writing emails down.  
+For this user the most likely time is around 10 to eleven and 16 to 17, Tuesdays and Thursdays, and also is important to say that there's such an active account between November and February.  
+![gmail-traffic-hour](./images/gmail-traffic-minute.png)
+
+## Locations
+
+The main input we used is the location history file, that is because the application is going to recommend the sites of interest around the most visited places. In other words we seek to describe the daily activity of the person and define their most frequent places (home, office or school).  
+
+During the day, a person performs two types of activities: staying in one place or moving to another.
+When a person visits a place, they tend to stay at that location for at least 10 minutes (can be extended to hours in home, office or school cases) which generates at least 17 location records.
+When the person moves from one place to another, a series of location records are generated along the transited space. These records may or may not be close (geographically) depending on the transfer speed. If you are in a congestion, it is possible, although unlikely, to confuse the place as a visit (depending on the tolerance we take for each visit). As a result of the day, location records generate a cloud of points with areas of high and low density.  
+
+In order to define the places visited during the day, it is proposed to use the DBSCAN Model which is an unsupervised clusterization algorithm based on density. When we used, the DBSCAN, unclassified points and points clusters are obtained. It will be assumed that points within a cluster are variations due to GPS accuracy or internal movements within the building. Also, within the clusters are the last records obtained during the displacement towards said cluster and the first records of the transfer to the next place. In order to define the visited location (the main one), the average of the records of each cluster will be taken excluding the first and the last in order to reduce the error caused by clustering.  
+
+The unlabeled points correspond to transfer location records. Also, was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period.  
+
+Using the data of the volunteers for this study, we found out that there are approximately 816 registered locations per day, approximately 34 records per hour or one record every 34 seconds.  
+
+```python
+import numpy as np
+from sklearn.cluster import DBSCAN
+from sklearn import metrics
+#from sklearn.datasets.samples_generator import make_blobs
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+import json
+import simplejson
+import datetime
+import calendar
+from urllib.request import urlopen,quote
+import os
+import webbrowser
+
+#import operator
+```
+
+```python
+#with open('Historialdeubicaciones.json', 'r') as fh:
+with open('LocationHistory2.json', 'r') as fh:
+    raw = json.loads(fh.read())
+
+ld = pd.DataFrame(raw['locations'])
+file = open("dia.csv","w") 
+for i in range(len(ld)):
+    file.write("{0:.7f}".format(ld['latitudeE7'][i]/10000000)+","+"{0:.7f}".format(ld['longitudeE7'][i]/10000000)+','+ld['timestampMs'][i]+','+
+    datetime.datetime.fromtimestamp(
+        int(ld['timestampMs'][i])/ 1e3
+    ).strftime('%Y-%m-%d')+','+datetime.datetime.fromtimestamp(
+        int(ld['timestampMs'][i])/ 1e3
+    ).strftime('%H:%M:%S')
++',' +calendar.day_name[datetime.datetime.fromtimestamp(int(ld['timestampMs'][i])/ 1e3  ).weekday()]+ '\n') 
+file.close()
+coords=pd.read_csv('dia.csv', names = ["lat", "lon","timestamp","fecha","hora","dia"])
+```
+
+Define frequent places: 30 day window
+
+```python
+coords3=coords[coords.fecha==coords['fecha'].unique()[0]]
+hours=['00:00:00','01:00:00',
+       '02:00:00','03:00:00',
+       '04:00:00','05:00:00',
+       '06:00:00','07:00:00',
+       '08:00:00','09:00:00',
+       '10:00:00','11:00:00',
+       '12:00:00','13:00:00',
+       '14:00:00','15:00:00',
+       '16:00:00','17:00:00',
+       '18:00:00','19:00:00',
+       '20:00:00','21:00:00',
+       '22:00:00','23:00:00','23:59:59']
+
+
+inicio=0
+final=10
+for i in range(inicio,final):
+    coords3=coords3.append(coords[coords.fecha==coords['fecha'].unique()[1+i]])
+print(coords['fecha'].unique()[1+inicio],coords['fecha'].unique()[1+final])
+
+cosa=coords3[['lat','lon']]
+cosa = cosa.reset_index(drop=True)
+min_samples=np.max([20,len(cosa)*.07])
+scaler = StandardScaler()
+scaler.fit(cosa)
+X=scaler.fit_transform(cosa)
+direcciones={}
+db = DBSCAN(eps=0.031, min_samples=min_samples).fit(X)
+core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+core_samples_mask[db.core_sample_indices_] = True
+labels = db.labels_
+cosa=cosa.iloc[db.core_sample_indices_]
+cosa = cosa.reset_index(drop=True)
+recuento={}
+# Number of clusters in labels, ignoring noise if present.
+n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+import matplotlib.pyplot as plt
+unique_labels = set(labels)
+colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
+
+clusters = [X[labels == i] for i in range(n_clusters_)]
+
+markers=""" """
+places="AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU"
+c0=scaler.inverse_transform(clusters[0])
+c0r=pd.DataFrame(data=c0[0:,0:])
+c0r.columns = ['lat', 'lon']
+c0r['cluster']=0
+casa={}
+matutino={}
+for i in range(n_clusters_):    
+    c0=scaler.inverse_transform(clusters[i])
+    c0r=pd.DataFrame(data=c0[0:,0:])
+    c0r.columns = ['lat', 'lon']
+    c0r['cluster']=i
+    aux=c0r.drop_duplicates()
+    aux=aux.reset_index(drop=True)
+    horas=coords3[(coords3['lat']==aux['lat'].loc[0]) &(coords3['lon']==aux['lon'].loc[0])]
+    casa[i]=0
+    matutino[i]=0
+    vespertino=0
+    diurno=0
+    for k in range(1,len(aux)):
+        horas=horas.append(coords3[(coords3['lat']==aux['lat'].loc[k]) &(coords3['lon']==aux['lon'].loc[k])])
+    cosita=datetime.datetime.strptime(np.max(horas['hora']),'%H:%M:%S')-datetime.datetime.strptime(np.min(horas['hora']),'%H:%M:%S')
+    maximo=datetime.datetime.strptime(np.max(horas['hora']),'%H:%M:%S')-cosita*0
+    minimo=datetime.datetime.strptime(np.min(horas['hora']),'%H:%M:%S')+cosita*0
+    bajo='00:00:00'
+    alto='00:00:00'
+    for alto in hours:
+        temp=horas[(horas['hora']<alto)&(horas['hora']>bajo)]
+        recuento[alto]=len(temp['hora'])
+        if ((alto<'07:00:00')|(alto>'23:00:00')):
+            casa[i]=casa[i]+len(temp['hora']) 
+        if ((alto<'17:00:00')|(alto>'11:00:00')):
+            matutino[i]=matutino[i]+len(temp['hora'])
+        bajo=alto
+    util=horas[(horas['hora']<maximo.strftime("%H:%M:%S"))&(horas['hora']>minimo.strftime("%H:%M:%S"))]
+    if(len(util)>0):
+        lon= np.mean(util['lon'])
+        lat= np.mean(util['lat'])  
+        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY"
+        with urlopen(url_maps) as response:
+            result= simplejson.load(urlopen(url_maps))
+        direcciones[i]=result['results'][0]['formatted_address']
+        url_places1="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+str(lat)+","+str(lon)+"&rankby=distance"+"&types=None"+"&key="+places
+
+        markers=markers+"""var marker = new google.maps.Marker({
+              map: map,
+            draggable: true, icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale:5
+              },
+
+              position: {lat: """+ str(lat) +""" , lng: """+str(lon)+"""},
+              title: '"""+result['results'][0]['formatted_address']+"""cluster: """+str(i)+"""'
+            });"""
+centro='{lat:'+ str(np.mean(cosa['lat'])) +""" , lng: """+str(np.mean(cosa['lon']))+'}'
+
+print(casa)
+print(matutino)
+print(direcciones)
+```
+
+    2017-03-21 2017-03-11
+    {0: 0, 1: 914, 2: 268, 3: 0}
+    {0: 1386, 1: 3333, 2: 830, 3: 1040}
+    {0: 'Edificio 10, Altavista, Ciudad de México, CDMX, Mexico', 1: 'Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico', 2: 'Cto. Interior Maestro José Vasconcelos 208, Condesa, 06140 Ciudad de México, CDMX, Mexico', 3: 'Torre C, Av Sta Fe 505, Santa Fe, Contadero, 01219 Ciudad de México, CDMX, Mexico'}
+
+
+```python
+#print('Trabajo: ',direcciones[max(matutino, key=matutino.get)])
+
+aux=[k for k, v in casa.items() if v > 0.4*sum(casa.values())]
+for i in aux:
+    print('Casa ',i,': ',direcciones[i])
+    aux=[k for k, v in matutino.items() if v > sum(matutino.values())/(n_clusters_+1)]
+for i in aux:
+    print('Trabajo/Escuela ',i,': ',direcciones[i])
+```
+
+Casa  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
+Trabajo/Escuela  0 :  Edificio 10, Altavista, Ciudad de México, CDMX, Mexico
+Trabajo/Escuela  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
+
+direcciones
+
+Day
+
+```python
+#with open('Historialdeubicaciones.json', 'r') as fh:
+with open('LocationHistory2.json', 'r') as fh:
+    raw = json.loads(fh.read())
+
+ld = pd.DataFrame(raw['locations'])
+file = open("dia.csv","w") 
+for i in range(len(ld)):
+    file.write("{0:.7f}".format(ld['latitudeE7'][i]/10000000)+","+"{0:.7f}".format(ld['longitudeE7'][i]/10000000)+','+ld['timestampMs'][i]+','+
+    datetime.datetime.fromtimestamp(
+        int(ld['timestampMs'][i])/ 1e3
+    ).strftime('%Y-%m-%d')+','+datetime.datetime.fromtimestamp(
+        int(ld['timestampMs'][i])/ 1e3
+    ).strftime('%H:%M:%S')
++',' +calendar.day_name[datetime.datetime.fromtimestamp(int(ld['timestampMs'][i])/ 1e3  ).weekday()]+ '\n') 
+file.close()
+coords=pd.read_csv('dia.csv', names = ["lat", "lon","timestamp","fecha","hora","dia"])
+```
+
+```python
+coords2=coords[coords.fecha=='2017-02-02']
+cosa=coords2[['lat','lon']]
+cosa = cosa.reset_index(drop=True)
+print(len(cosa))
+min_samples=np.max([20,len(cosa)*.05])
+print('min',min_samples)
+scaler = StandardScaler()
+scaler.fit(cosa)
+X=scaler.fit_transform(cosa)
+
+db = DBSCAN(eps=0.085, min_samples=min_samples).fit(X)
+core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
+core_samples_mask[db.core_sample_indices_] = True
+print(len(db.core_sample_indices_))
+labels = db.labels_
+cosa=cosa.iloc[db.core_sample_indices_]
+cosa = cosa.reset_index(drop=True)
+
+# Number of clusters in labels, ignoring noise if present.
+n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+print('Estimated number of clusters: %d' % n_clusters_)
+import matplotlib.pyplot as plt
+unique_labels = set(labels)
+colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
+for k, col in zip(unique_labels, colors):
+    if k == -1:
+        # Black used for noise.
+        col = 'k'
+
+    class_member_mask = (labels == k)
+
+    xy = X[class_member_mask & core_samples_mask]
+    plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
+             markeredgecolor='k', markersize=7)
+
+    xy = X[class_member_mask & ~core_samples_mask]
+    plt.plot(xy[:, 0], xy[:, 1], 'o', markerfacecolor=col,
+             markeredgecolor='k', markersize=2)
+
+plt.title('Estimated number of clusters: %d' % n_clusters_)
+plt.axis('off')
+plt.show()
+clusters = [X[labels == i] for i in range(n_clusters_)]
+
+markers=""" """
+places="AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU"
+c0=scaler.inverse_transform(clusters[0])
+c0r=pd.DataFrame(data=c0[0:,0:])
+c0r.columns = ['lat', 'lon']
+c0r['cluster']=0
+intento=c0r
+
+for i in range(n_clusters_):    
+    c0=scaler.inverse_transform(clusters[i])
+    c0r=pd.DataFrame(data=c0[0:,0:])
+    c0r.columns = ['lat', 'lon']
+    c0r['cluster']=i
+    intento=intento.append(c0r)
+    aux=c0r.drop_duplicates()
+    aux=aux.reset_index(drop=True)
+    horas=coords2[(coords2['lat']==aux['lat'].loc[0]) &(coords2['lon']==aux['lon'].loc[0])]
+    for k in range(1,len(aux)):
+        horas=horas.append(coords2[(coords2['lat']==aux['lat'].loc[k]) &(coords2['lon']==aux['lon'].loc[k])])
+    cosita=datetime.datetime.strptime(np.max(horas['hora']),'%H:%M:%S')-datetime.datetime.strptime(np.min(horas['hora']),'%H:%M:%S')
+    maximo=datetime.datetime.strptime(np.max(horas['hora']),'%H:%M:%S')-cosita*.1
+    minimo=datetime.datetime.strptime(np.min(horas['hora']),'%H:%M:%S')+cosita*.1
+    print (i,maximo,minimo)
+    util=horas[(horas['hora']<maximo.strftime("%H:%M:%S"))&(horas['hora']>minimo.strftime("%H:%M:%S"))]
+    if(len(util)>0):
+        lon= np.mean(util['lon'])
+        lat= np.mean(util['lat'])  
+        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY"
+        with urlopen(url_maps) as response:
+            result= simplejson.load(urlopen(url_maps))
+        print (result['results'][0]['formatted_address'])
+        url_places1="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="+str(lat)+","+str(lon)+"&rankby=distance"+"&types=None"+"&key="+places
+        #with urlopen(url_places1) as response:
+         #   result_p1= simplejson.load(urlopen(url_places1))
+        #print ("están en:",result_p1['results'][0]['name'],'---',result_p1['results'][0]['types'][0])
+
+        markers=markers+"""var marker = new google.maps.Marker({
+              map: map,
+            draggable: true, icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale:5
+              },
+
+              position: {lat: """+ str(lat) +""" , lng: """+str(lon)+"""},
+              title: '"""+result['results'][0]['formatted_address']+"""cluster: """+str(i)+"""'
+            });"""
+centro='{lat:'+ str(np.mean(cosa['lat'])) +""" , lng: """+str(np.mean(cosa['lon']))+'}'
+hours=['00:00:00','00:15:00','00:30:00','00:45:00','01:00:00',
+       '01:15:00','01:30:00','01:45:00','02:00:00','02:15:00',
+       '02:30:00','02:45:00','03:00:00','03:15:00','03:30:00',
+       '03:45:00','04:00:00','04:15:00','04:30:00','04:45:00',
+       '05:00:00','05:15:00','05:30:00','05:45:00','06:00:00',
+       '06:15:00','06:30:00','06:45:00','07:00:00','07:15:00',
+       '07:30:00','07:45:00','08:00:00','08:15:00','08:30:00',
+       '08:45:00','09:00:00','09:15:00','09:30:00','09:45:00',
+       '10:00:00','10:15:00','10:30:00','10:45:00','11:00:00',
+       '11:15:00','11:30:00','11:45:00','12:00:00','12:15:00',
+       '12:30:00','12:45:00','13:00:00','13:15:00','13:30:00',
+       '13:45:00','14:00:00','14:15:00','14:30:00','14:45:00',
+       '15:00:00','15:15:00','15:30:00','15:45:00','16:00:00',
+       '16:15:00','16:30:00','16:45:00','17:00:00','17:15:00','17:30:00','17:45:00',
+       '18:00:00','18:15:00','18:30:00','18:45:00','19:00:00','19:15:00','19:30:00','19:45:00',
+       '20:00:00','20:15:00','20:30:00','20:45:00','21:00:00','21:15:00','21:30:00','21:45:00',
+       '22:00:00','22:15:00','22:30:00','22:45:00','23:00:00','23:15:00','23:30:00','23:45:00']
+
+
+result = pd.merge(coords2, intento,how='inner', on=['lat', 'lon'])
+join=result.drop_duplicates()
+bajo='00:00:00'
+alto='00:00:00'
+transporte=0
+cluster=-20
+ultima=np.min(join['hora'])
+
+for j in range(1,len(hours)):
+    alto=hours[j]
+    chin=join[(join['hora']>bajo)&(join['hora']<alto)]
+
+    if len(chin['cluster'].unique())>1:
+        #print ('Cambio de cluster!!')
+        conflicto={}
+        for i in chin['cluster'].unique():
+            conflicto[i]=np.min(chin[chin['cluster']==i]['hora'])
+        sorted_x = sorted(conflicto.items(), key=operator.itemgetter(1))
+        print(sorted_x)
+        for ii in sorted_x:
+            i=ii[0]
+
+            if cluster==i:
+                ultima=np.max(chin[chin['cluster']==cluster]['hora'])
+            else:
+                print('te fuiste de ',cluster,' a las ',ultima)
+                auxT=ultima
+                cluster=i
+                print('llegaste a ',cluster, 'a las ',np.min(chin[chin['cluster']==i]['hora']))
+                ultima=np.max(chin[chin['cluster']==cluster]['hora'])
+                print('--Tiempo de traslado: ',(datetime.datetime.strptime(np.min(chin[chin['cluster']==i]['hora']),'%H:%M:%S')-datetime.datetime.strptime(auxT,'%H:%M:%S')).seconds)
+                transporte= transporte+(datetime.datetime.strptime(np.min(chin[chin['cluster']==i]['hora']),'%H:%M:%S')-datetime.datetime.strptime(auxT,'%H:%M:%S')).seconds
+    else: 
+        if len(chin['cluster'].unique())==1:
+            if cluster==chin['cluster'].unique()[0]:
+                ultima=np.max(chin[chin['cluster']==cluster]['hora'])
+            else: 
+                if cluster==-20:
+                    print('amaneciste en', chin['cluster'].unique()[0])
+                    if len(chin[chin['cluster']==cluster]['hora'])>0:
+                        ultima=np.max(chin[chin['cluster']==cluster]['hora'])
+                        auxT=ultima
+                        print(ultima,auxT)
+
+
+                else:
+                    #print('cambio de cluster ',cluster,' a ',chin['cluster'].unique()[0])
+                    print('Te fuiste de ',cluster,' a las ',ultima)
+                    auxT=ultima
+                    #print('Ultima ub. registrada: ',np.max(chin[chin['cluster']==cluster]['hora']))
+                    # print('Ultima ub. registrada para ',cluster,': ',cluster,ultima)
+                #print(chin[chin['cluster']==cluster])
+                
+                cluster=chin['cluster'].unique()[0]
+                auxT=ultima
+
+                ultima=np.max(chin[chin['cluster']==cluster]['hora'])
+                print('Llegaste a ',cluster,' a las: ',np.min(chin[chin['cluster']==cluster]['hora']))
+                print('--Tiempo de traslado: ',str(datetime.timedelta(seconds=(datetime.datetime.strptime(np.min(chin[chin['cluster']==cluster]['hora']),'%H:%M:%S')-datetime.datetime.strptime(auxT,'%H:%M:%S')).seconds)))
+                transporte= transporte+(datetime.datetime.strptime(np.min(chin[chin['cluster']==cluster]['hora']),'%H:%M:%S')-datetime.datetime.strptime(auxT,'%H:%M:%S')).seconds
+                
+        #else:
+            # print('no hay ubicaciones registradas entre ',bajo,' y ',alto)
+    bajo=alto
+    
+print ('En el día usaste',str(datetime.timedelta(seconds=transporte)),' para desplazarte')
+```
+
+Output:
+
+    0 1900-01-01 22:52:04.600000 1900-01-01 20:23:29.400000
+    Paseo de la Reforma 50, Miguel Hidalgo, 11550 Ciudad de México, CDMX, Mexico
+    1 1900-01-01 22:54:49.300000 1900-01-01 18:35:55.700000
+    Felipe Villanueva 19, Guadalupe Inn, 01020 Ciudad de México, CDMX, Mexico
+    2 1900-01-01 16:45:28.700000 1900-01-01 10:27:10.300000
+    Torre C, Av Sta Fe 505, Santa Fe, Contadero, 01219 Ciudad de México, CDMX, Mexico
+    3 1900-01-01 07:25:18.700000 1900-01-01 00:50:28.300000
+    Cerro San Francisco 309, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
+    amaneciste en 3
+    Llegaste a  3  a las:  00:01:07
+    --Tiempo de traslado:  0:00:00
+    Te fuiste de  3  a las  08:14:40
+    Llegaste a  2  a las:  09:39:53
+    --Tiempo de traslado:  1:25:13
+    Te fuiste de  2  a las  17:32:46
+    Llegaste a  1  a las:  18:03:34
+    --Tiempo de traslado:  0:30:48
+    Te fuiste de  1  a las  19:48:47
+    Llegaste a  0  a las:  20:04:55
+    --Tiempo de traslado:  0:16:08
+    Te fuiste de  0  a las  23:10:39
+    Llegaste a  1  a las:  23:21:48
+    --Tiempo de traslado:  0:11:09
+    En el día usaste 2:23:18  para desplazarte
+
+
+![clusters](./images/clusters.png)
+
+
+## Searches
+
+It is very important to get insights of the searches' data because is going to help to find highlights keywords whose will deprecate the sites of interest the application is going to recommend.  
+
+When we analyzed the user searches, we considered two approaches that allowed us to detect relevant characteristics and activities of the user, and to use this information obtained in the recommendation.  
+
+First, to detect topics in a general is to build a full corpus, where we can detect general characteristics of the user using automatic clustering algorithms, then compare the different algorithms outputs and determine the number of topics.  
+
+Secondly, we seek to analyze the user search periods, once the most important issues are detected in the first step, to detect the periodicity in terms of frequency and search topics. In this way, we will be able to detect if the identified issues correspond to activities that the user still performs, that already has time without realizing them or that has been doing them for a long time, later we use this information in the algorithm of recommendation.  
+
+In both cases an automatic detection is sought. To achieve these goals we consider the following characteristics of Google searches:  
+
+1. They do not require grammatical rules to be able to show a result
+2. It is advisable to perform searches without punctuation marks to achieve better results
+3. Google is able to interpret languages without specifying the language in which you are writing
+
+Considering these characteristics, we observe that the steps for pre-processing the text decrease, and it is also necessary to perform it in different languages, in our case it will be done in English and Spanish, which are the most frequently used languages among our users. Although later research may include automatic language detection tools to perform automatic cleaning of the text, according to the corpus being processed.  
+
+```python
+#!/usr/local/Cellar/python3/3.5.1/bin/python3
+import sys
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+if __name__ == "__main__":
+    
+    todos=[[] for i in range(7)]
+    dias=0
+
+    while True:
+
+        linea = sys.stdin.readline()
+        if not linea:
+            break
+        
+        # print(linea)
+        separado=linea.split(',')
+
+        # 1 es numeroDia, 2 es nombreDia
+        x = int(separado[1])
+        y = [int(i) for i in separado[3:27]]
+
+        #print(separado)
+        #print(y)
+        
+        todos[x].append(y)
+        dias+=1
+    
+    fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(9, 4))
+
+    axes[0][0].set_title('Lunes')
+    axes[0][1].set_title('Martes')
+    axes[0][2].set_title('Miercoles')
+    axes[0][3].set_title('Jueves')
+    axes[1][0].set_title('Viernes')
+    axes[1][1].set_title('Sabado')
+    axes[1][2].set_title('Domingo')
+    
+    numdia = 0
+    for j in range(2):
+        for i in range(4):
+            if not (j == 1 and i > 2):
+                dia = np.array(todos[numdia])
+                numdia+=1
+
+                bar_l = [i+1 for i in range(24)]
+                performance=dia.mean(0)
+                error=dia.std(0)
+                
+                # axes[j][i].barh(bar_l, performance, xerr=error, align='center',alpha = 0.5, color='green', ecolor='gray')
+                axes[j][i].errorbar(bar_l, performance, yerr=error, fmt='o')
+
+    # adding horizontal grid lines
+    #for ax in axes:
+    #    ax.yaxis.grid(True)
+    #    ax.set_xticks([y+1 for y in range(len(all_data))])
+    #    ax.set_xlabel('xlabel')
+    #    ax.set_ylabel('ylabel')
+
+    print("dias: {}".format(dias))
+    # add x-tick labels
+    #plt.setp(axes, xticks=[y+1 for y in range(len(all_data))],
+    #         xticklabels=['x1', 'x2', 'x3', 'x4'])
+    plt.show()
+```
+
+![search-frequency](./images/search-frequency.png)
+
+```python
+
+from datetime import timedelta, datetime
+import json
+import sys
+import operator
+
+def daterange(start_date, end_date):
+    for n in range(int ((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+if __name__ == "__main__":
+
+    while True:
+        x = sys.stdin.readline()
+
+        x = x.replace('\n', '')
+        if not x:
+            break
+        # print(x) # mostrar nombre del archivo
+
+        datemin=datetime.now() 
+        datemax=datetime.fromtimestamp(0/1e6)
+        with open(x) as data_file:
+            data = json.load(data_file)
+
+            dias = {}
+            i=0
+            for query in data['event']:
+
+                    query_text = query['query']['query_text']
+                    timestamp = int(query['query']['id'][0]['timestamp_usec'])
+                    date = datetime.fromtimestamp(timestamp/1e6)
+                    
+                    nombredia = date.strftime("%A")
+                    diasemana = date.weekday()
+
+                    if date > datemax:
+                        datemax=date
+
+                    if date < datemin:
+                        datemin=date
+
+                    hash = date.year * 10000 + date.month * 100 + date.day
+
+                    if hash in dias.keys():
+                        dias[hash][date.hour+2]+=1
+                    else:
+                        dias[hash]=[0 for i in range(24)]
+                        dias[hash].insert(0,nombredia)
+                        dias[hash].insert(0,diasemana)
+                        dias[hash][date.hour+2]+=1
+
+            # print("num dias con consultas: {}".format(len(dias)))
+
+        
+
+        for date in daterange(datemin, datemax):
+            hash = date.year * 10000 + date.month * 100 + date.day
+            if not hash in dias.keys():
+                nombredia = date.strftime("%A")
+                diasemana = date.weekday()
+                dias[hash]=[0 for i in range(24)]
+                dias[hash].insert(0,nombredia)
+                dias[hash].insert(0,diasemana)
+                #print("faltaba: {}".format(hash))
+
+            #print single_date.strftime("%Y-%m-%d")
+
+
+        sorted_x = sorted(dias.items(), key=operator.itemgetter(0))
+        for k, v in enumerate(sorted_x): 
+            width = len(v[1])
+            for j in range(width):
+                if j == 0:
+                    print('{},'.format(v[0]), end='')
+                if j == width-1:
+                    print('{}'.format(v[1][j]))
+                else:
+                    print('{},'.format(v[1][j]), end='')
+```

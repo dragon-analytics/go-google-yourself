@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Just a Recommender System Based on Google Applications Data</title>
+  <meta name="description" content="A short description of the study driven">
+  <meta name="generator" content="bookdown 0.4 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Just a Recommender System Based on Google Applications Data" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="A short description of the study driven" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Just a Recommender System Based on Google Applications Data" />
+  
+  <meta name="twitter:description" content="A short description of the study driven" />
+  
+
+<meta name="author" content="Alfredo Méndez, Eduardo D. Martínez, Alaín Cabrera, Pedro Hernández - ITAM">
+
+
+<meta name="date" content="2017-05-23">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="conclusion.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Go & Google Yourself</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Abstract</a></li>
+<li class="chapter" data-level="2" data-path="introduction.html"><a href="introduction.html"><i class="fa fa-check"></i><b>2</b> Introduction</a><ul>
+<li class="chapter" data-level="2.1" data-path="introduction.html"><a href="introduction.html#go-google-yourself"><i class="fa fa-check"></i><b>2.1</b> Go Google Yourself!</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction.html"><a href="introduction.html#google-takeout"><i class="fa fa-check"></i><b>2.2</b> Google Takeout</a></li>
+<li class="chapter" data-level="2.3" data-path="introduction.html"><a href="introduction.html#recommender-systems"><i class="fa fa-check"></i><b>2.3</b> Recommender Systems</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html"><i class="fa fa-check"></i><b>3</b> The Shape of The Data</a><ul>
+<li class="chapter" data-level="3.1" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#google-data"><i class="fa fa-check"></i><b>3.1</b> Google Data</a></li>
+<li class="chapter" data-level="3.2" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#search"><i class="fa fa-check"></i><b>3.2</b> Search</a></li>
+<li class="chapter" data-level="3.3" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#locations"><i class="fa fa-check"></i><b>3.3</b> Locations</a></li>
+<li class="chapter" data-level="3.4" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#emails"><i class="fa fa-check"></i><b>3.4</b> Emails</a><ul>
+<li class="chapter" data-level="3.4.1" data-path="the-shape-of-the-data.html"><a href="the-shape-of-the-data.html#data-pipeline"><i class="fa fa-check"></i><b>3.4.1</b> Data Pipeline</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html"><i class="fa fa-check"></i><b>4</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="4.1" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#network-analysis"><i class="fa fa-check"></i><b>4.1</b> Network Analysis</a></li>
+<li class="chapter" data-level="4.2" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#e-mails-analysis"><i class="fa fa-check"></i><b>4.2</b> E-mails Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#plot-the-mail-traffic-by-the-day-of-the-week"><i class="fa fa-check"></i><b>4.2.1</b> Plot the mail traffic by the day of the week</a></li>
+<li class="chapter" data-level="4.2.2" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#plot-the-mail-traffic-by-the-hour-of-the-day"><i class="fa fa-check"></i><b>4.2.2</b> Plot the mail traffic by the hour of the day</a></li>
+<li class="chapter" data-level="4.2.3" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#plot-the-mail-traffic-by-the-minute-of-the-day"><i class="fa fa-check"></i><b>4.2.3</b> Plot the mail traffic by the minute of the day</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#locations-1"><i class="fa fa-check"></i><b>4.3</b> Locations</a></li>
+<li class="chapter" data-level="4.4" data-path="exploratory-data-analysis.html"><a href="exploratory-data-analysis.html#searches"><i class="fa fa-check"></i><b>4.4</b> Searches</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html"><i class="fa fa-check"></i><b>5</b> Building a Recommender System</a><ul>
+<li class="chapter" data-level="5.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#modular-application-framework"><i class="fa fa-check"></i><b>5.1</b> Modular Application Framework</a></li>
+<li class="chapter" data-level="5.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-user-interface"><i class="fa fa-check"></i><b>5.2</b> The User Interface</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#r-shiny-keep-it-simple-alfy"><i class="fa fa-check"></i><b>5.2.1</b> R-Shiny, Keep it Simple (Alfy)</a></li>
+<li class="chapter" data-level="5.2.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#google-maps-api-alain"><i class="fa fa-check"></i><b>5.2.2</b> Google Maps API (Alaín)</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-cloud-and-back-end"><i class="fa fa-check"></i><b>5.3</b> The Cloud and Back-end</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#amazon-web-services"><i class="fa fa-check"></i><b>5.3.1</b> Amazon Web Services</a></li>
+<li class="chapter" data-level="5.3.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#merge-the-pieces"><i class="fa fa-check"></i><b>5.3.2</b> Merge the Pieces</a></li>
+</ul></li>
+<li class="chapter" data-level="5.4" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#further-than-beta-version"><i class="fa fa-check"></i><b>5.4</b> Further Than Beta Version</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i><b>6</b> Conclusion</a></li>
+<li class="chapter" data-level="7" data-path="bibliografy.html"><a href="bibliografy.html"><i class="fa fa-check"></i><b>7</b> Bibliografy</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Just a Recommender System Based on Google Applications Data</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="bibliografy" class="section level1">
+<h1><span class="header-section-number">Chapter 7</span> Bibliografy</h1>
+<p>[<a href="http://dataliberation.blogspot.mx/2011/06/data-liberation-front-delivers-google.html">1</a>] Fitzpatrick, Brian. <em>“The Data Liberation Front Delivers Google Takeout”</em> (June 28, 2011) Retrieved from <a href="http://dataliberation.blogspot.mx/2011/06/data-liberation-front-delivers-google.html" class="uri">http://dataliberation.blogspot.mx/2011/06/data-liberation-front-delivers-google.html</a></p>
+<p>[<a href="https://ico.org.uk/media/for-organisations/documents/1554/determining-what-is-personal-data.pdf">2</a>] ico.org.uk <em>“Determining what is personal data”</em> (Dec 12, 2012) Pages 6-12</p>
+<p>[<a href="http://www.inf.unibz.it/~ricci/papers/intro-rec-sys-handbook.pdf">3</a>] Francesco Ricci, Lior R. and Bracha S. <em>“Introduction to Recommender Systems Handbook”</em> (2011) Springer Science+Business Media</p>
+<p>[<a href="http://www.ijiet.org/papers/113-K0008.pdf">4</a>] Hosein Jafarkarimi; A.T.H. Sim and R. Saadatdoost <em>“A Naïve Recommendation Model for Large Databases”</em> (June 2012), International Journal of Information and Education Technology</p>
+<p>[<a href="http://itl.nist.gov/div898/handbook/toolaids/pff/eda.pdf">5</a>] itl.nist.gov <em>“What is EDA?”</em> (June 27, 2012) National Institute of Standarts and Technology U.S.</p>
+<p>[<a href="http://www.paris21.org/sites/default/files/PARIS21-DiscussionPaper7-StatisticalCapacity.pdf">6</a>] Graham Eele. <em>“Building Statistical Capacity”</em> (July 2015) Partnership in Statistics for Development in the 21st Century. Discussion Paper No. 7</p>
+<p>[<a href="http://docear.org/papers/research_paper_recommender_system_evaluation--a_quantitative_literature_survey.pdf">7</a>] Beel J., Langer S. et al. <em>“Research Paper Recommender System Evaluation: A Quantitative Literature Survey”</em> (2015) Pages 15-24</p>
+<p>[<a href="https://grouplens.org/site-content/uploads/evaluating-TOIS-20041.pdf">8</a>] J.L. Herlocker, J.A. Konstan, L.G. Terveen, and J.T. Riedl, <em>“Evaluating collaborative filtering recommender systems”</em> ACM Transactions on Information Systems (TOIS)</p>
+<p>[<a href="http://rstudio.github.io/shiny/tutorial/#welcome">9</a>] Retrieved from <a href="http://rstudio.github.io/shiny/tutorial/#welcome" class="uri">http://rstudio.github.io/shiny/tutorial/#welcome</a> on May, 2017</p>
+<p>[<a href="http://flask.pocoo.org/docs/0.10/foreword/#what-does-micro-mean">10</a>] Retrieved from <a href="http://flask.pocoo.org/docs/0.10/foreword/#what-does-micro-mean" class="uri">http://flask.pocoo.org/docs/0.10/foreword/#what-does-micro-mean</a> on May, 2017</p>
+<p>[11] Amazon S3, Cloud Computing Storage for Files, Images, Videos. aws.amazon.com (2017). Retrieved May 22, 2017, from <a href="https://aws.amazon.com/es/s3/" class="uri">https://aws.amazon.com/es/s3/</a></p>
+<p>[12] Amazon S3. (2017, April 12). In Wikipedia, The Free Encyclopedia. Retrieved May 22, 2017, from <a href="https://en.wikipedia.org/w/index.php?title=Amazon_S3&amp;oldid=775022059" class="uri">https://en.wikipedia.org/w/index.php?title=Amazon_S3&amp;oldid=775022059</a></p>
+<p>[13] LaMonica, Martin (March 27, 2008). “Amazon Web Services adds ‘resiliency’ to EC2 compute service”. CNet News. Retrieved May 22, 2017, from <a href="https://www.cnet.com/news/amazon-web-services-adds-resiliency-to-ec2-compute-service/" class="uri">https://www.cnet.com/news/amazon-web-services-adds-resiliency-to-ec2-compute-service/</a></p>
+<p>[14] Erik Bernhardsson et al, “Luigi”. Github. Retrieved May 22, 2017, from <a href="https://github.com/spotify/luigi" class="uri">https://github.com/spotify/luigi</a></p>
+<p>[15] O’Gara, Maureen (26 July 2013). “Ben Golub, Who Sold Gluster to Red Hat, Now Running dotCloud”. SYS-CON Media. Retrieved May 22, 2017, from <a href="http://maureenogara.sys-con.com/node/2747331" class="uri">http://maureenogara.sys-con.com/node/2747331</a>.</p>
+<p>[16] “Select a storage driver documentation”. Docker documentation. Archived from the original on 2016-12-06. Retrieved May 22, 2017, from <a href="https://docs.docker.com/engine/userguide/storagedriver/selectadriver/" class="uri">https://docs.docker.com/engine/userguide/storagedriver/selectadriver/</a>.</p>
+<p>[17] “Docker Documentation: Kernel Requirements”. docker.readthedocs.org. 2014-01-04. Archived from the original on 2014-08-21. Retrieved May 22, 2017, from <a href="https://web.archive.org/web/20140821065734/http://docker.readthedocs.org/en/v0.7.3/installation/kernel/" class="uri">https://web.archive.org/web/20140821065734/http://docker.readthedocs.org/en/v0.7.3/installation/kernel/</a>.</p>
+<p>[18] “Swarm mode key concepts”. docs.docker.com. Retrieved May 22, 2017, from <a href="https://docs.docker.com/engine/swarm/key-concepts/" class="uri">https://docs.docker.com/engine/swarm/key-concepts/</a>.</p>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="conclusion.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
