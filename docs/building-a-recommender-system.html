@@ -127,7 +127,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="5.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#modular-application-framework"><i class="fa fa-check"></i><b>5.1</b> Modular Application Framework</a></li>
 <li class="chapter" data-level="5.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-user-interface"><i class="fa fa-check"></i><b>5.2</b> The User Interface</a><ul>
 <li class="chapter" data-level="5.2.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#r-shiny-keep-it-simple"><i class="fa fa-check"></i><b>5.2.1</b> R-Shiny, Keep it Simple</a></li>
-<li class="chapter" data-level="5.2.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#google-maps-api"><i class="fa fa-check"></i><b>5.2.2</b> Google Maps API</a></li>
+<li class="chapter" data-level="5.2.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#google-maps-api-and-places-recommendation-algorithm"><i class="fa fa-check"></i><b>5.2.2</b> Google Maps API and Places Recommendation Algorithm</a></li>
 </ul></li>
 <li class="chapter" data-level="5.3" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-cloud-and-back-end"><i class="fa fa-check"></i><b>5.3</b> The Cloud and Back-end</a><ul>
 <li class="chapter" data-level="5.3.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#amazon-web-services"><i class="fa fa-check"></i><b>5.3.1</b> Amazon Web Services</a></li>
@@ -183,25 +183,27 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="r-shiny-keep-it-simple" class="section level3">
 <h3><span class="header-section-number">5.2.1</span> R-Shiny, Keep it Simple</h3>
 <p>For the development of the application it was used <a href="https://shiny.rstudio.com">Shiny</a> as front-end, and the only prupose is visualize the output of the models and the descriptive data, to understand this, Shiny will only cares about how to get summary dataframes.</p>
-<p>Shiny is an open source R package that provides an elegant and powerful web framework for building web applications using R. Shiny helps out to turn the analyses into interactive web applications without requiring HTML, CSS, or JavaScript requirements.[9]</p>
-<p>For the sake of simplicity it is been chosed <a href="http://flask.pocoo.org">Flask</a> as Back-end framework, to make everything work</p>
-<p>Flask is called a micro framework because it does not require particular tools or libraries. It has no database abstraction layer for itself, form validation, or any other components. However, Flask supports extensions that can add application features as if they were implemented here is used to run the cluster and the database.[10]</p>
+<p>One important fact to notice here is that Shiny actually does not have any process “inside”, in other words, if one wants to use a Shiny app to show the result of some study, normally the visualization tools and algorithms are run inside the app.</p>
+<p>Instead of, this modular framework, runs all the process and pipeline on Python, after that it sends the outputs to S3 buckets, and then Shiny is always “asking” S3 for the files, as we might see, there is no interaction between R-Shiny and Python algorithms, and all they work perfectly.</p>
+<p>Shiny is an open source R package that provides an elegant and powerful web framework for building web applications using R. Shiny helps out to turn the analyses into interactive web applications without requiring HTML, CSS, or JavaScript requirements.[9] For the sake of simplicity it is been chosed <a href="http://flask.pocoo.org">Flask</a> as Back-end framework, to make everything work.</p>
+<p>On the other hand, Flask is called a micro framework because it does not require particular tools or libraries. It has no database abstraction layer for itself, form validation, or any other components. However, Flask supports extensions that can add application features as if they were implemented here is used to run the cluster and the database.[10]</p>
+<p>The main screen of every application is very significant for the sake of the user experience, that is why on the development is used <a href="https://rstudio.github.io/shinydashboard/index.html">Shiny Dashboard</a>, a beauty Shiny library that helps an intuitive navigation through the app options, from uploading the Google takeout file then the analysis results and finally the recommendations on the map.</p>
 </div>
-<div id="google-maps-api" class="section level3">
-<h3><span class="header-section-number">5.2.2</span> Google Maps API</h3>
-<ul>
-<li>What is Google Maps API</li>
-<li>How google maps api works?</li>
-<li>How Clustering Models works?</li>
-<li>How the recommendations looks like?</li>
-</ul>
+<div id="google-maps-api-and-places-recommendation-algorithm" class="section level3">
+<h3><span class="header-section-number">5.2.2</span> Google Maps API and Places Recommendation Algorithm</h3>
+<p>Google APIs is a set of application programming interfaces (APIs) developed by Google which allow communication with Google Services and their integration to other services. Examples of these include Search, Gmail, Translate or Google Maps. Third-party apps can use these APIs to take advantage of or extend the functionality of the existing services. For the development of this work we use the Google Places API Web Service.</p>
+<p>The Google Places API Web Service allows you to query for place information on a variety of categories, such as: establishments, prominent points of interest, geographic locations, and more. You can search for places either by proximity or a text string. A Place Search returns a list of places along with summary information about each place; additional information is available via a Place Details query.</p>
+<p>It is posible to restrict the results to places matching the specified type (around 90 types, for example: restaurant and library). The following example is a search request for places of type ‘restaurant’ within a 500m radius of a point in Sydney, Australia, containing the word ‘cruise’:</p>
+<p><a href="https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&amp;radius=500&amp;type=restaurant&amp;keyword=cruise&amp;key=YOUR_API_KEY" class="uri">https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&amp;radius=500&amp;type=restaurant&amp;keyword=cruise&amp;key=YOUR_API_KEY</a></p>
+<p>As it is been seen, taking advance of this kind of tools Google itself can help the joint of recommendation places, but first it is needed the topics found on the algorithm.</p>
+<p>The first step for this algorithm is to extract the keywords from searches and email records and obtain the most frequent locations. Then these keywords are classified in 90 possible categories. Finally, for each location, the google place API is used for place search specifying the categories previously obtained.</p>
 </div>
 </div>
 <div id="the-cloud-and-back-end" class="section level2">
 <h2><span class="header-section-number">5.3</span> The Cloud and Back-end</h2>
 <div id="amazon-web-services" class="section level3">
 <h3><span class="header-section-number">5.3.1</span> Amazon Web Services</h3>
-<p>Our back-end implementation made use of two powerfull Amazon Web Services (AWS) tools, Amazon Simple Storage Service (S3) and Amazon Elastic Compute Cloud (EC2). The first, Amazon S3 known as storage for Internet, provides different interfaces REST, SOAP and BitTorrent that allow to store and obtain any amount of data, from anywhere on the web. Although S3 does not provide details on its design, clearly manages its data through an object storage arquitecture. This objects are organized into buckets. A bucket is a container used to store key/value pairs in S3 and can hold an unlimited amount of data so the user could potentially had just one bucket for all of his information.<br />
+<p>The application back-end implementation made use of two powerfull Amazon Web Services (AWS) tools, Amazon Simple Storage Service (S3) and Amazon Elastic Compute Cloud (EC2). The first, Amazon S3 known as storage for Internet, provides different interfaces REST, SOAP and BitTorrent that allow to store and obtain any amount of data, from anywhere on the web. Although S3 does not provide details on its design, clearly manages its data through an object storage arquitecture. This objects are organized into buckets. A bucket is a container used to store key/value pairs in S3 and can hold an unlimited amount of data so the user could potentially had just one bucket for all of his information.<br />
 According to Amazon, this design aims at to provide scalability, high avalilability and low latency at commodity costs. [11] Amazon S3, also has implementations on different programming languages and third party connectors like Java, .NET, Python, PHP, Ruby, among others, that help on data migration to the cloud. Requests of resources are authorized using an Access Control List (ACL) associated with each bucket and object. The names and keys of the bucket must be unique and chosen so that the objects are addressable by HTTP URLs: [12]</p>
 <ul>
 <li><a href="http://s3.amazonaws.com/bucket/key" class="uri">http://s3.amazonaws.com/bucket/key</a></li>

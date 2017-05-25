@@ -127,7 +127,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="5.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#modular-application-framework"><i class="fa fa-check"></i><b>5.1</b> Modular Application Framework</a></li>
 <li class="chapter" data-level="5.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-user-interface"><i class="fa fa-check"></i><b>5.2</b> The User Interface</a><ul>
 <li class="chapter" data-level="5.2.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#r-shiny-keep-it-simple"><i class="fa fa-check"></i><b>5.2.1</b> R-Shiny, Keep it Simple</a></li>
-<li class="chapter" data-level="5.2.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#google-maps-api"><i class="fa fa-check"></i><b>5.2.2</b> Google Maps API</a></li>
+<li class="chapter" data-level="5.2.2" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#google-maps-api-and-places-recommendation-algorithm"><i class="fa fa-check"></i><b>5.2.2</b> Google Maps API and Places Recommendation Algorithm</a></li>
 </ul></li>
 <li class="chapter" data-level="5.3" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#the-cloud-and-back-end"><i class="fa fa-check"></i><b>5.3</b> The Cloud and Back-end</a><ul>
 <li class="chapter" data-level="5.3.1" data-path="building-a-recommender-system.html"><a href="building-a-recommender-system.html#amazon-web-services"><i class="fa fa-check"></i><b>5.3.1</b> Amazon Web Services</a></li>
@@ -339,40 +339,99 @@ plt.show()</code></pre></div>
 </div>
 <div id="locations" class="section level2">
 <h2><span class="header-section-number">8.2</span> Locations</h2>
-<p>The unlabeled points correspond to transfer location records. Also, was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period.</p>
 <p>Using the data of the volunteers for this study, we found out that there are approximately 816 registered locations per day, approximately 34 records per hour or one record every 34 seconds.</p>
+<p>Define frequent places: 30 day window</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> numpy <span class="im">as</span> np
 <span class="im">from</span> sklearn.cluster <span class="im">import</span> DBSCAN
 <span class="im">from</span> sklearn <span class="im">import</span> metrics
-<span class="co">#from sklearn.datasets.samples_generator import make_blobs</span>
 <span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler
 <span class="im">import</span> pandas <span class="im">as</span> pd
 <span class="im">import</span> json
 <span class="im">import</span> simplejson
 <span class="im">import</span> datetime
-<span class="im">import</span> calendar
-<span class="im">from</span> urllib.request <span class="im">import</span> urlopen,quote
 <span class="im">import</span> os
 <span class="im">import</span> webbrowser
+<span class="im">import</span> time
+<span class="im">import</span> csv
 
-<span class="co">#import operator</span></code></pre></div>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co">#with open(&#39;Historialdeubicaciones.json&#39;, &#39;r&#39;) as fh:</span>
-<span class="cf">with</span> <span class="bu">open</span>(<span class="st">&#39;LocationHistory2.json&#39;</span>, <span class="st">&#39;r&#39;</span>) <span class="im">as</span> fh:
+<span class="cf">with</span> <span class="bu">open</span>(<span class="st">&#39;Historial-de-ubicaciones.json&#39;</span>, <span class="st">&#39;r&#39;</span>) <span class="im">as</span> fh:
     raw <span class="op">=</span> json.loads(fh.read())
-
 ld <span class="op">=</span> pd.DataFrame(raw[<span class="st">&#39;locations&#39;</span>])
-<span class="bu">file</span> <span class="op">=</span> <span class="bu">open</span>(<span class="st">&quot;dia.csv&quot;</span>,<span class="st">&quot;w&quot;</span>) 
-<span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(ld)):
-    <span class="bu">file</span>.write(<span class="st">&quot;</span><span class="sc">{0:.7f}</span><span class="st">&quot;</span>.<span class="bu">format</span>(ld[<span class="st">&#39;latitudeE7&#39;</span>][i]<span class="op">/</span><span class="dv">10000000</span>)<span class="op">+</span><span class="st">&quot;,&quot;</span><span class="op">+</span><span class="st">&quot;</span><span class="sc">{0:.7f}</span><span class="st">&quot;</span>.<span class="bu">format</span>(ld[<span class="st">&#39;longitudeE7&#39;</span>][i]<span class="op">/</span><span class="dv">10000000</span>)<span class="op">+</span><span class="st">&#39;,&#39;</span><span class="op">+</span>ld[<span class="st">&#39;timestampMs&#39;</span>][i]<span class="op">+</span><span class="st">&#39;,&#39;</span><span class="op">+</span>
-    datetime.datetime.fromtimestamp(
-        <span class="bu">int</span>(ld[<span class="st">&#39;timestampMs&#39;</span>][i])<span class="op">/</span> <span class="fl">1e3</span>
-    ).strftime(<span class="st">&#39;%Y-%m-</span><span class="sc">%d</span><span class="st">&#39;</span>)<span class="op">+</span><span class="st">&#39;,&#39;</span><span class="op">+</span>datetime.datetime.fromtimestamp(
-        <span class="bu">int</span>(ld[<span class="st">&#39;timestampMs&#39;</span>][i])<span class="op">/</span> <span class="fl">1e3</span>
-    ).strftime(<span class="st">&#39;%H:%M:%S&#39;</span>)
-<span class="op">+</span><span class="st">&#39;,&#39;</span> <span class="op">+</span>calendar.day_name[datetime.datetime.fromtimestamp(<span class="bu">int</span>(ld[<span class="st">&#39;timestampMs&#39;</span>][i])<span class="op">/</span> <span class="fl">1e3</span>  ).weekday()]<span class="op">+</span> <span class="st">&#39;</span><span class="ch">\n</span><span class="st">&#39;</span>) 
-<span class="bu">file</span>.close()
-coords<span class="op">=</span>pd.read_csv(<span class="st">&#39;dia.csv&#39;</span>, names <span class="op">=</span> [<span class="st">&quot;lat&quot;</span>, <span class="st">&quot;lon&quot;</span>,<span class="st">&quot;timestamp&quot;</span>,<span class="st">&quot;fecha&quot;</span>,<span class="st">&quot;hora&quot;</span>,<span class="st">&quot;dia&quot;</span>])</code></pre></div>
-<p>Define frequent places: 30 day window</p>
+
+coords<span class="op">=</span>ld[[<span class="st">&#39;latitudeE7&#39;</span>,<span class="st">&#39;longitudeE7&#39;</span>,<span class="st">&#39;timestampMs&#39;</span>]]
+coords[<span class="st">&#39;timestampMs&#39;</span>] <span class="op">=</span> coords[<span class="st">&#39;timestampMs&#39;</span>].<span class="bu">apply</span>(pd.to_numeric)
+
+inicio_s<span class="op">=</span> <span class="st">&quot;01/03/2017&quot;</span>
+final_s<span class="op">=</span><span class="st">&quot;30/03/2017&quot;</span>
+inicio<span class="op">=</span><span class="dv">1000</span><span class="op">*</span>time.mktime(datetime.datetime.strptime(inicio_s, <span class="st">&quot;</span><span class="sc">%d</span><span class="st">/%m/%Y&quot;</span>).timetuple())
+final<span class="op">=</span><span class="dv">1000</span><span class="op">*</span>time.mktime(datetime.datetime.strptime(final_s, <span class="st">&quot;</span><span class="sc">%d</span><span class="st">/%m/%Y&quot;</span>).timetuple())
+
+coords3<span class="op">=</span>coords[(coords[<span class="st">&#39;timestampMs&#39;</span>]<span class="op">&gt;</span>inicio)<span class="op">&amp;</span>(coords[<span class="st">&#39;timestampMs&#39;</span>]<span class="op">&lt;</span>final)]
+coords3.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>,<span class="st">&#39;timestamp&#39;</span>]
+coords3[<span class="st">&#39;lat&#39;</span>]<span class="op">=</span>coords3[<span class="st">&#39;lat&#39;</span>]<span class="op">/</span><span class="fl">1e7</span>
+coords3[<span class="st">&#39;lon&#39;</span>]<span class="op">=</span>coords3[<span class="st">&#39;lon&#39;</span>]<span class="op">/</span><span class="fl">1e7</span>
+
+cosa<span class="op">=</span>coords3[[<span class="st">&#39;lat&#39;</span>,<span class="st">&#39;lon&#39;</span>]]
+min_samples<span class="op">=</span>np.<span class="bu">max</span>([<span class="bu">len</span>(cosa)<span class="op">*</span>.<span class="dv">05</span>,<span class="dv">700</span>])
+
+scaler <span class="op">=</span> StandardScaler()
+scaler.fit(cosa)
+X<span class="op">=</span>scaler.fit_transform(cosa)
+direcciones<span class="op">=</span>{}
+kms_per_radian <span class="op">=</span> <span class="fl">6371.0088</span>
+epsilon <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>kms_per_radian
+
+<span class="co">#First DBSCAN: HOME/SCHOOL/OFFICE detection</span>
+db <span class="op">=</span> DBSCAN(eps<span class="op">=</span>epsilon, min_samples<span class="op">=</span>min_samples,algorithm<span class="op">=</span><span class="st">&#39;ball_tree&#39;</span>, metric<span class="op">=</span><span class="st">&#39;haversine&#39;</span>).fit(X)
+
+labels <span class="op">=</span> db.labels_
+n_clusters_ <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(labels)) <span class="op">-</span> (<span class="dv">1</span> <span class="cf">if</span> <span class="op">-</span><span class="dv">1</span> <span class="kw">in</span> labels <span class="cf">else</span> <span class="dv">0</span>)
+df_out <span class="op">=</span> pd.DataFrame(columns<span class="op">=</span>[<span class="st">&#39;lat&#39;</span>,<span class="st">&#39;lon&#39;</span>,<span class="st">&#39;type&#39;</span>])
+
+<span class="cf">if</span> (n_clusters_<span class="op">&gt;</span><span class="dv">0</span>):
+    clusters <span class="op">=</span> [X[labels <span class="op">==</span> i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_clusters_)]
+    c0<span class="op">=</span>scaler.inverse_transform(clusters[<span class="dv">0</span>])
+    c0r<span class="op">=</span>pd.DataFrame(data<span class="op">=</span>c0[<span class="dv">0</span>:,<span class="dv">0</span>:])
+    c0r.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>]
+    c0r[<span class="st">&#39;cluster&#39;</span>]<span class="op">=</span><span class="dv">0</span>
+
+    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_clusters_):    
+        c0<span class="op">=</span>scaler.inverse_transform(clusters[i])
+        c0r<span class="op">=</span>pd.DataFrame(data<span class="op">=</span>c0[<span class="dv">0</span>:,<span class="dv">0</span>:])
+        c0r.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>]
+        lon<span class="op">=</span> np.mean(c0r[<span class="st">&#39;lon&#39;</span>])
+        lat<span class="op">=</span> np.mean(c0r[<span class="st">&#39;lat&#39;</span>])
+        df_out.loc[i]<span class="op">=</span>[lat,lon,<span class="dv">0</span>]
+
+df2<span class="op">=</span>X[labels <span class="op">==</span> <span class="op">-</span><span class="dv">1</span>]
+X<span class="op">=</span>df2
+min_samples<span class="op">=</span><span class="bu">len</span>(df2)<span class="op">*</span>.<span class="dv">01</span>
+
+<span class="co">#Second DBSCAN: most visited places detection</span>
+
+db <span class="op">=</span> DBSCAN(eps<span class="op">=</span>epsilon, min_samples<span class="op">=</span>min_samples,algorithm<span class="op">=</span><span class="st">&#39;ball_tree&#39;</span>, metric<span class="op">=</span><span class="st">&#39;haversine&#39;</span>).fit(X)
+labels <span class="op">=</span> db.labels_
+n_clusters_ <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(labels)) <span class="op">-</span> (<span class="dv">1</span> <span class="cf">if</span> <span class="op">-</span><span class="dv">1</span> <span class="kw">in</span> labels <span class="cf">else</span> <span class="dv">0</span>)
+
+<span class="cf">if</span> (n_clusters_<span class="op">&gt;</span><span class="dv">0</span>):
+    n_clusters_ <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(labels)) <span class="op">-</span> (<span class="dv">1</span> <span class="cf">if</span> <span class="op">-</span><span class="dv">1</span> <span class="kw">in</span> labels <span class="cf">else</span> <span class="dv">0</span>)
+    clusters <span class="op">=</span> [X[labels <span class="op">==</span> i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_clusters_)]
+    c0<span class="op">=</span>scaler.inverse_transform(clusters[<span class="dv">0</span>])
+    c0r<span class="op">=</span>pd.DataFrame(data<span class="op">=</span>c0[<span class="dv">0</span>:,<span class="dv">0</span>:])
+    c0r.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>]
+    c0r[<span class="st">&#39;cluster&#39;</span>]<span class="op">=</span><span class="dv">0</span>
+    direcciones<span class="op">=</span>{}
+    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_clusters_):    
+        c0<span class="op">=</span>scaler.inverse_transform(clusters[i])
+        c0r<span class="op">=</span>pd.DataFrame(data<span class="op">=</span>c0[<span class="dv">0</span>:,<span class="dv">0</span>:])
+        c0r.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>]
+        c0r[<span class="st">&#39;cluster&#39;</span>]<span class="op">=</span>i
+        lon<span class="op">=</span> np.mean(c0r[<span class="st">&#39;lon&#39;</span>])
+        lat<span class="op">=</span> np.mean(c0r[<span class="st">&#39;lat&#39;</span>])
+        df_out.loc[<span class="bu">len</span>(df_out)] <span class="op">=</span> [lat,lon, <span class="dv">1</span>] 
+    df_out.to_csv(<span class="st">&#39;cosa.csv&#39;</span>, encoding<span class="op">=</span><span class="st">&#39;utf-8&#39;</span>)
+<span class="cf">else</span>: <span class="bu">print</span>(<span class="st">&#39;acabamos&#39;</span>)</code></pre></div>
+<p>It was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period. In order to define home, school or office adress, we count the frecuency of each cluster at different time periods.</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">coords3<span class="op">=</span>coords[coords.fecha<span class="op">==</span>coords[<span class="st">&#39;fecha&#39;</span>].unique()[<span class="dv">0</span>]]
 hours<span class="op">=</span>[<span class="st">&#39;00:00:00&#39;</span>,<span class="st">&#39;01:00:00&#39;</span>,
        <span class="st">&#39;02:00:00&#39;</span>,<span class="st">&#39;03:00:00&#39;</span>,
@@ -387,13 +446,10 @@ hours<span class="op">=</span>[<span class="st">&#39;00:00:00&#39;</span>,<span 
        <span class="st">&#39;20:00:00&#39;</span>,<span class="st">&#39;21:00:00&#39;</span>,
        <span class="st">&#39;22:00:00&#39;</span>,<span class="st">&#39;23:00:00&#39;</span>,<span class="st">&#39;23:59:59&#39;</span>]
 
-
-inicio<span class="op">=</span><span class="dv">0</span>
-final<span class="op">=</span><span class="dv">10</span>
-<span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(inicio,final):
-    coords3<span class="op">=</span>coords3.append(coords[coords.fecha<span class="op">==</span>coords[<span class="st">&#39;fecha&#39;</span>].unique()[<span class="dv">1</span><span class="op">+</span>i]])
-<span class="bu">print</span>(coords[<span class="st">&#39;fecha&#39;</span>].unique()[<span class="dv">1</span><span class="op">+</span>inicio],coords[<span class="st">&#39;fecha&#39;</span>].unique()[<span class="dv">1</span><span class="op">+</span>final])
-
+inicio_s<span class="op">=</span> <span class="st">&quot;01/03/2017&quot;</span>
+final_s<span class="op">=</span><span class="st">&quot;30/03/2017&quot;</span>
+inicio<span class="op">=</span><span class="dv">1000</span><span class="op">*</span>time.mktime(datetime.datetime.strptime(inicio_s, <span class="st">&quot;</span><span class="sc">%d</span><span class="st">/%m/%Y&quot;</span>).timetuple())
+final<span class="op">=</span><span class="dv">1000</span><span class="op">*</span>time.mktime(datetime.datetime.strptime(final_s, <span class="st">&quot;</span><span class="sc">%d</span><span class="st">/%m/%Y&quot;</span>).timetuple())
 cosa<span class="op">=</span>coords3[[<span class="st">&#39;lat&#39;</span>,<span class="st">&#39;lon&#39;</span>]]
 cosa <span class="op">=</span> cosa.reset_index(drop<span class="op">=</span><span class="va">True</span>)
 min_samples<span class="op">=</span>np.<span class="bu">max</span>([<span class="dv">20</span>,<span class="bu">len</span>(cosa)<span class="op">*</span>.<span class="dv">07</span>])
@@ -413,11 +469,9 @@ n_clusters_ <span class="op">=</span> <span class="bu">len</span>(<span class="b
 <span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt
 unique_labels <span class="op">=</span> <span class="bu">set</span>(labels)
 colors <span class="op">=</span> plt.cm.Spectral(np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, <span class="bu">len</span>(unique_labels)))
-
 clusters <span class="op">=</span> [X[labels <span class="op">==</span> i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_clusters_)]
-
 markers<span class="op">=</span><span class="st">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-places<span class="op">=</span><span class="st">&quot;AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU&quot;</span>
+places<span class="op">=</span><span class="st">&quot;YOUR_API_KEY&quot;</span>
 c0<span class="op">=</span>scaler.inverse_transform(clusters[<span class="dv">0</span>])
 c0r<span class="op">=</span>pd.DataFrame(data<span class="op">=</span>c0[<span class="dv">0</span>:,<span class="dv">0</span>:])
 c0r.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>]
@@ -455,7 +509,7 @@ matutino<span class="op">=</span>{}
     <span class="cf">if</span>(<span class="bu">len</span>(util)<span class="op">&gt;</span><span class="dv">0</span>):
         lon<span class="op">=</span> np.mean(util[<span class="st">&#39;lon&#39;</span>])
         lat<span class="op">=</span> np.mean(util[<span class="st">&#39;lat&#39;</span>])  
-        url_maps<span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/geocode/json?latlng=&quot;</span><span class="op">+</span><span class="bu">str</span>(lat)<span class="op">+</span><span class="st">&quot;,&quot;</span><span class="op">+</span><span class="bu">str</span>(lon)<span class="op">+</span><span class="st">&quot;&amp;key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY&quot;</span>
+        url_maps<span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/geocode/json?latlng=&quot;</span><span class="op">+</span><span class="bu">str</span>(lat)<span class="op">+</span><span class="st">&quot;,&quot;</span><span class="op">+</span><span class="bu">str</span>(lon)<span class="op">+</span><span class="st">&quot;&amp;key=YOUR_API_KEY&quot;</span>
         <span class="cf">with</span> urlopen(url_maps) <span class="im">as</span> response:
             result<span class="op">=</span> simplejson.load(urlopen(url_maps))
         direcciones[i]<span class="op">=</span>result[<span class="st">&#39;results&#39;</span>][<span class="dv">0</span>][<span class="st">&#39;formatted_address&#39;</span>]
@@ -473,24 +527,23 @@ matutino<span class="op">=</span>{}
 <span class="st">            });&quot;&quot;&quot;</span>
 centro<span class="op">=</span><span class="st">&#39;{lat:&#39;</span><span class="op">+</span> <span class="bu">str</span>(np.mean(cosa[<span class="st">&#39;lat&#39;</span>])) <span class="op">+</span><span class="st">&quot;&quot;&quot; , lng: &quot;&quot;&quot;</span><span class="op">+</span><span class="bu">str</span>(np.mean(cosa[<span class="st">&#39;lon&#39;</span>]))<span class="op">+</span><span class="st">&#39;}&#39;</span>
 
-<span class="bu">print</span>(casa)
-<span class="bu">print</span>(matutino)
-<span class="bu">print</span>(direcciones)</code></pre></div>
+<span class="bu">print</span>(<span class="st">&#39;Hogar: &#39;</span>,casa)
+<span class="bu">print</span>(<span class="st">&#39;Trabajo/Escuela: &#39;</span>,matutino)
+<span class="bu">print</span>(<span class="st">&#39;Lugares: &#39;</span>direcciones)</code></pre></div>
 <pre><code>2017-03-21 2017-03-11
-{0: 0, 1: 914, 2: 268, 3: 0}
-{0: 1386, 1: 3333, 2: 830, 3: 1040}
-{0: &#39;Edificio 10, Altavista, Ciudad de México, CDMX, Mexico&#39;, 1: &#39;Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico&#39;, 2: &#39;Cto. Interior Maestro José Vasconcelos 208, Condesa, 06140 Ciudad de México, CDMX, Mexico&#39;, 3: &#39;Torre C, Av Sta Fe 505, Santa Fe, Contadero, 01219 Ciudad de México, CDMX, Mexico&#39;}</code></pre>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co">#print(&#39;Trabajo: &#39;,direcciones[max(matutino, key=matutino.get)])</span>
-
-aux<span class="op">=</span>[k <span class="cf">for</span> k, v <span class="kw">in</span> casa.items() <span class="cf">if</span> v <span class="op">&gt;</span> <span class="fl">0.4</span><span class="op">*</span><span class="bu">sum</span>(casa.values())]
+Hogar: {0: 0, 1: 914, 2: 268, 3: 0}
+Trabajo/Escuela: {0: 1386, 1: 3333, 2: 830, 3: 1040}
+Lugares: {0: &#39;Edificio 10, Altavista, Ciudad de México, CDMX, Mexico&#39;, 1: &#39;Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico&#39;, 2: &#39;Cto. Interior Maestro José Vasconcelos 208, Condesa, 06140 Ciudad de México, CDMX, Mexico&#39;, 3: &#39;Torre C, Av Sta Fe 505, Santa Fe, Contadero, 01219 Ciudad de México, CDMX, Mexico&#39;}</code></pre>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python">aux<span class="op">=</span>[k <span class="cf">for</span> k, v <span class="kw">in</span> casa.items() <span class="cf">if</span> v <span class="op">&gt;</span> <span class="fl">0.4</span><span class="op">*</span><span class="bu">sum</span>(casa.values())]
 <span class="cf">for</span> i <span class="kw">in</span> aux:
     <span class="bu">print</span>(<span class="st">&#39;Casa &#39;</span>,i,<span class="st">&#39;: &#39;</span>,direcciones[i])
     aux<span class="op">=</span>[k <span class="cf">for</span> k, v <span class="kw">in</span> matutino.items() <span class="cf">if</span> v <span class="op">&gt;</span> <span class="bu">sum</span>(matutino.values())<span class="op">/</span>(n_clusters_<span class="op">+</span><span class="dv">1</span>)]
 <span class="cf">for</span> i <span class="kw">in</span> aux:
     <span class="bu">print</span>(<span class="st">&#39;Trabajo/Escuela &#39;</span>,i,<span class="st">&#39;: &#39;</span>,direcciones[i])</code></pre></div>
-<p>Casa 1 : Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico Trabajo/Escuela 0 : Edificio 10, Altavista, Ciudad de México, CDMX, Mexico Trabajo/Escuela 1 : Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico</p>
-<p>direcciones</p>
-<p>Day</p>
+<p>Casa 1 : Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico</p>
+<p>Trabajo/Escuela 0 : Edificio 10, Altavista, Ciudad de México, CDMX, Mexico</p>
+<p>Trabajo/Escuela 1 : Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico</p>
+<p>Additionally it is possible to obtain the activity performed by the people for each day.</p>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co">#with open(&#39;Historialdeubicaciones.json&#39;, &#39;r&#39;) as fh:</span>
 <span class="cf">with</span> <span class="bu">open</span>(<span class="st">&#39;LocationHistory2.json&#39;</span>, <span class="st">&#39;r&#39;</span>) <span class="im">as</span> fh:
     raw <span class="op">=</span> json.loads(fh.read())
@@ -552,7 +605,7 @@ plt.show()
 clusters <span class="op">=</span> [X[labels <span class="op">==</span> i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n_clusters_)]
 
 markers<span class="op">=</span><span class="st">&quot;&quot;&quot; &quot;&quot;&quot;</span>
-places<span class="op">=</span><span class="st">&quot;AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU&quot;</span>
+places<span class="op">=</span><span class="st">&quot;YOUR_API_KEY&quot;</span>
 c0<span class="op">=</span>scaler.inverse_transform(clusters[<span class="dv">0</span>])
 c0r<span class="op">=</span>pd.DataFrame(data<span class="op">=</span>c0[<span class="dv">0</span>:,<span class="dv">0</span>:])
 c0r.columns <span class="op">=</span> [<span class="st">&#39;lat&#39;</span>, <span class="st">&#39;lon&#39;</span>]
@@ -578,7 +631,7 @@ intento<span class="op">=</span>c0r
     <span class="cf">if</span>(<span class="bu">len</span>(util)<span class="op">&gt;</span><span class="dv">0</span>):
         lon<span class="op">=</span> np.mean(util[<span class="st">&#39;lon&#39;</span>])
         lat<span class="op">=</span> np.mean(util[<span class="st">&#39;lat&#39;</span>])  
-        url_maps<span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/geocode/json?latlng=&quot;</span><span class="op">+</span><span class="bu">str</span>(lat)<span class="op">+</span><span class="st">&quot;,&quot;</span><span class="op">+</span><span class="bu">str</span>(lon)<span class="op">+</span><span class="st">&quot;&amp;key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY&quot;</span>
+        url_maps<span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/geocode/json?latlng=&quot;</span><span class="op">+</span><span class="bu">str</span>(lat)<span class="op">+</span><span class="st">&quot;,&quot;</span><span class="op">+</span><span class="bu">str</span>(lon)<span class="op">+</span><span class="st">&quot;&amp;key=YOUR_API_KEY&quot;</span>
         <span class="cf">with</span> urlopen(url_maps) <span class="im">as</span> response:
             result<span class="op">=</span> simplejson.load(urlopen(url_maps))
         <span class="bu">print</span> (result[<span class="st">&#39;results&#39;</span>][<span class="dv">0</span>][<span class="st">&#39;formatted_address&#39;</span>])

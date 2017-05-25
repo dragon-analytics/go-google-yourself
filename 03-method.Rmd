@@ -146,8 +146,3 @@ As it can be seen on the next outputs, first it shows the most frequent places, 
 ![clusters](./images/clusters.png)
 Figure 9. Clusters found on the map
 
-# Places Recommendation Algorithm
-
-+ The first step for this algorthm is to extract the keywords from searches and email records and obtain the most frequent locations.
-+ These keywords are classified in 90 possible categories.
-+ For each location the google place api is used for place search specifying the categories previously obtained.

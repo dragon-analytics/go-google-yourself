@@ -215,48 +215,104 @@ plt.show()
 
 ## Locations
 
-The unlabeled points correspond to transfer location records. Also, was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period.  
-
 Using the data of the volunteers for this study, we found out that there are approximately 816 registered locations per day, approximately 34 records per hour or one record every 34 seconds.  
+
+Define frequent places: 30 day window
 
 ```python
 import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
-#from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import json
 import simplejson
 import datetime
-import calendar
-from urllib.request import urlopen,quote
 import os
 import webbrowser
+import time
+import csv
 
-#import operator
-```
-
-```python
-#with open('Historialdeubicaciones.json', 'r') as fh:
-with open('LocationHistory2.json', 'r') as fh:
+with open('Historial-de-ubicaciones.json', 'r') as fh:
     raw = json.loads(fh.read())
-
 ld = pd.DataFrame(raw['locations'])
-file = open("dia.csv","w") 
-for i in range(len(ld)):
-    file.write("{0:.7f}".format(ld['latitudeE7'][i]/10000000)+","+"{0:.7f}".format(ld['longitudeE7'][i]/10000000)+','+ld['timestampMs'][i]+','+
-    datetime.datetime.fromtimestamp(
-        int(ld['timestampMs'][i])/ 1e3
-    ).strftime('%Y-%m-%d')+','+datetime.datetime.fromtimestamp(
-        int(ld['timestampMs'][i])/ 1e3
-    ).strftime('%H:%M:%S')
-+',' +calendar.day_name[datetime.datetime.fromtimestamp(int(ld['timestampMs'][i])/ 1e3  ).weekday()]+ '\n') 
-file.close()
-coords=pd.read_csv('dia.csv', names = ["lat", "lon","timestamp","fecha","hora","dia"])
-```
 
-Define frequent places: 30 day window
+coords=ld[['latitudeE7','longitudeE7','timestampMs']]
+coords['timestampMs'] = coords['timestampMs'].apply(pd.to_numeric)
+
+inicio_s= "01/03/2017"
+final_s="30/03/2017"
+inicio=1000*time.mktime(datetime.datetime.strptime(inicio_s, "%d/%m/%Y").timetuple())
+final=1000*time.mktime(datetime.datetime.strptime(final_s, "%d/%m/%Y").timetuple())
+
+coords3=coords[(coords['timestampMs']>inicio)&(coords['timestampMs']<final)]
+coords3.columns = ['lat', 'lon','timestamp']
+coords3['lat']=coords3['lat']/1e7
+coords3['lon']=coords3['lon']/1e7
+
+cosa=coords3[['lat','lon']]
+min_samples=np.max([len(cosa)*.05,700])
+
+scaler = StandardScaler()
+scaler.fit(cosa)
+X=scaler.fit_transform(cosa)
+direcciones={}
+kms_per_radian = 6371.0088
+epsilon = 1/kms_per_radian
+
+#First DBSCAN: HOME/SCHOOL/OFFICE detection
+db = DBSCAN(eps=epsilon, min_samples=min_samples,algorithm='ball_tree', metric='haversine').fit(X)
+
+labels = db.labels_
+n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+df_out = pd.DataFrame(columns=['lat','lon','type'])
+
+if (n_clusters_>0):
+    clusters = [X[labels == i] for i in range(n_clusters_)]
+    c0=scaler.inverse_transform(clusters[0])
+    c0r=pd.DataFrame(data=c0[0:,0:])
+    c0r.columns = ['lat', 'lon']
+    c0r['cluster']=0
+
+    for i in range(n_clusters_):    
+        c0=scaler.inverse_transform(clusters[i])
+        c0r=pd.DataFrame(data=c0[0:,0:])
+        c0r.columns = ['lat', 'lon']
+        lon= np.mean(c0r['lon'])
+        lat= np.mean(c0r['lat'])
+        df_out.loc[i]=[lat,lon,0]
+
+df2=X[labels == -1]
+X=df2
+min_samples=len(df2)*.01
+
+#Second DBSCAN: most visited places detection
+
+db = DBSCAN(eps=epsilon, min_samples=min_samples,algorithm='ball_tree', metric='haversine').fit(X)
+labels = db.labels_
+n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+
+if (n_clusters_>0):
+    n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+    clusters = [X[labels == i] for i in range(n_clusters_)]
+    c0=scaler.inverse_transform(clusters[0])
+    c0r=pd.DataFrame(data=c0[0:,0:])
+    c0r.columns = ['lat', 'lon']
+    c0r['cluster']=0
+    direcciones={}
+    for i in range(n_clusters_):    
+        c0=scaler.inverse_transform(clusters[i])
+        c0r=pd.DataFrame(data=c0[0:,0:])
+        c0r.columns = ['lat', 'lon']
+        c0r['cluster']=i
+        lon= np.mean(c0r['lon'])
+        lat= np.mean(c0r['lat'])
+        df_out.loc[len(df_out)] = [lat,lon, 1] 
+    df_out.to_csv('cosa.csv', encoding='utf-8')
+else: print('acabamos')
+```
+It was quite hard to define the frequently places, so we used a window of 30 days in order to detect if the period of analysis is a common period or a change of address (work or school) or a holiday period. In order to define home, school or office adress, we count the frecuency of each cluster at different time periods.
+
 
 ```python
 coords3=coords[coords.fecha==coords['fecha'].unique()[0]]
@@ -273,13 +329,10 @@ hours=['00:00:00','01:00:00',
        '20:00:00','21:00:00',
        '22:00:00','23:00:00','23:59:59']
 
-
-inicio=0
-final=10
-for i in range(inicio,final):
-    coords3=coords3.append(coords[coords.fecha==coords['fecha'].unique()[1+i]])
-print(coords['fecha'].unique()[1+inicio],coords['fecha'].unique()[1+final])
-
+inicio_s= "01/03/2017"
+final_s="30/03/2017"
+inicio=1000*time.mktime(datetime.datetime.strptime(inicio_s, "%d/%m/%Y").timetuple())
+final=1000*time.mktime(datetime.datetime.strptime(final_s, "%d/%m/%Y").timetuple())
 cosa=coords3[['lat','lon']]
 cosa = cosa.reset_index(drop=True)
 min_samples=np.max([20,len(cosa)*.07])
@@ -299,11 +352,9 @@ n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
 import matplotlib.pyplot as plt
 unique_labels = set(labels)
 colors = plt.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
-
 clusters = [X[labels == i] for i in range(n_clusters_)]
-
 markers=""" """
-places="AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU"
+places="YOUR_API_KEY"
 c0=scaler.inverse_transform(clusters[0])
 c0r=pd.DataFrame(data=c0[0:,0:])
 c0r.columns = ['lat', 'lon']
@@ -341,7 +392,7 @@ for i in range(n_clusters_):
     if(len(util)>0):
         lon= np.mean(util['lon'])
         lat= np.mean(util['lat'])  
-        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY"
+        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=YOUR_API_KEY"
         with urlopen(url_maps) as response:
             result= simplejson.load(urlopen(url_maps))
         direcciones[i]=result['results'][0]['formatted_address']
@@ -359,20 +410,18 @@ for i in range(n_clusters_):
             });"""
 centro='{lat:'+ str(np.mean(cosa['lat'])) +""" , lng: """+str(np.mean(cosa['lon']))+'}'
 
-print(casa)
-print(matutino)
-print(direcciones)
+print('Hogar: ',casa)
+print('Trabajo/Escuela: ',matutino)
+print('Lugares: 'direcciones)
 ```
 
     2017-03-21 2017-03-11
-    {0: 0, 1: 914, 2: 268, 3: 0}
-    {0: 1386, 1: 3333, 2: 830, 3: 1040}
-    {0: 'Edificio 10, Altavista, Ciudad de México, CDMX, Mexico', 1: 'Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico', 2: 'Cto. Interior Maestro José Vasconcelos 208, Condesa, 06140 Ciudad de México, CDMX, Mexico', 3: 'Torre C, Av Sta Fe 505, Santa Fe, Contadero, 01219 Ciudad de México, CDMX, Mexico'}
+    Hogar: {0: 0, 1: 914, 2: 268, 3: 0}
+    Trabajo/Escuela: {0: 1386, 1: 3333, 2: 830, 3: 1040}
+    Lugares: {0: 'Edificio 10, Altavista, Ciudad de México, CDMX, Mexico', 1: 'Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico', 2: 'Cto. Interior Maestro José Vasconcelos 208, Condesa, 06140 Ciudad de México, CDMX, Mexico', 3: 'Torre C, Av Sta Fe 505, Santa Fe, Contadero, 01219 Ciudad de México, CDMX, Mexico'}
 
 
 ```python
-#print('Trabajo: ',direcciones[max(matutino, key=matutino.get)])
-
 aux=[k for k, v in casa.items() if v > 0.4*sum(casa.values())]
 for i in aux:
     print('Casa ',i,': ',direcciones[i])
@@ -382,12 +431,13 @@ for i in aux:
 ```
 
 Casa  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
+
 Trabajo/Escuela  0 :  Edificio 10, Altavista, Ciudad de México, CDMX, Mexico
+
 Trabajo/Escuela  1 :  Cerro San Francisco 305, Campestre Churubusco, 04200 Ciudad de México, CDMX, Mexico
 
-direcciones
 
-Day
+Additionally it is possible to obtain the activity performed by the people for each day.
 
 ```python
 #with open('Historialdeubicaciones.json', 'r') as fh:
@@ -454,7 +504,7 @@ plt.show()
 clusters = [X[labels == i] for i in range(n_clusters_)]
 
 markers=""" """
-places="AIzaSyCsgMwi_tzAVkae-8Rq9v2A_kjeJF5L2kU"
+places="YOUR_API_KEY"
 c0=scaler.inverse_transform(clusters[0])
 c0r=pd.DataFrame(data=c0[0:,0:])
 c0r.columns = ['lat', 'lon']
@@ -480,7 +530,7 @@ for i in range(n_clusters_):
     if(len(util)>0):
         lon= np.mean(util['lon'])
         lat= np.mean(util['lat'])  
-        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=AIzaSyCb0Wakn29V87eBdMd_fAb3DGcxAKtqtxY"
+        url_maps="https://maps.googleapis.com/maps/api/geocode/json?latlng="+str(lat)+","+str(lon)+"&key=YOUR_API_KEY"
         with urlopen(url_maps) as response:
             result= simplejson.load(urlopen(url_maps))
         print (result['results'][0]['formatted_address'])
